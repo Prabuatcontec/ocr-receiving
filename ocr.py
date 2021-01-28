@@ -1,6 +1,7 @@
  
 import cv2 
 import pytesseract 
+from PIL import Image,ImageTk
 # 1.creating a video object
 count = 0
 # 1.creating a video object
