@@ -9,17 +9,36 @@ body {
   font-family: 'Open Sans', sans-serif;
 }
 
-
-
-
+.ocr_bg {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 60%
+}
 /* 
  * Header
  */
 
 header {
-  background-color: #fff;
-  padding: 25px 0;
+  background-color: #2D323E !important;
+  height: 60px;
+  color: #ffffff !important;
 }
+
+header h1 {
+  color: #ffffff !important;
+}
+
+.container-fluid {
+  margin: 10px !important;
+}
+
+header img {
+  height: 40px;
+  float:left;
+  margin-top: 10px;
+}
+
 
 .title {
   float: left;
@@ -27,11 +46,23 @@ header {
   font-size: 17px;
   letter-spacing: 2.5px;
   text-transform: uppercase;
-  margin: 0px 20px;
+  margin: 20px 10px;
 }
 
 .title a, .title a:visited {
   color: #3a3a3a;
+}
+
+.ocr_head{
+  float: left;
+  width: 40%;
+}
+.ocr_head_button{
+  float: right;
+  margin-left: 1%;
+}
+.ocr_body{
+  clear: both;
 }
 
 .upload-image-thumb {

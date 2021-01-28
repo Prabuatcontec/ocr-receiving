@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 from werkzeug import secure_filename
 import os
 import sys
@@ -8,6 +8,7 @@ import cv2
 import Tkinter as tkinter
 import re
 from PIL import Image,ImageTk
+from camera import VideoCamera
 
 __author__ = 'Prabu <mprabu@gocontec.com>'
 __source__ = ''
@@ -19,32 +20,34 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
 @app.route("/")
 def index():
-  # 1.creating a video object
-  count = 0
-  # 1.creating a video object
-  cap = cv2.VideoCapture(0)
-  while cap.isOpened():
-    ret, frame = cap.read()
-    img1 = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    text = pytesseract.image_to_string(Image.fromarray(img1))
-    print("Extracted Text: ", text)
-    if ret:
-        if text.upper().strip() != "":
-            cv2.imwrite("frame%d.jpg" % count, frame)     # save frame as JPEG file
-            count += 1
-        else:
-            count = 0
-    else:
-        break
-    if cv2.waitKey(0) & 0xFF == ord('q'):
-        break
-    print("Extracted Text: ", text)
-  cap.release()  
   return render_template("index.html")
 
-@app.route("/about")
+@app.route("/video", methods = ['GET', 'POST'])
 def about():
-  return render_template("about.html")
+  return render_template("ocr.html")
+
+def gen(camera):
+    while True:
+        frame = camera.get_frame()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+def ocr(camera):
+    while True:
+        frame = camera.get_ocr()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+@app.route('/ocr', methods = ['GET', 'POST'])
+def video_ocr():
+  return Response(ocr(VideoCamera()),
+                  mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/video_feed')
+def video_feed():
+  return Response(gen(VideoCamera()),
+                  mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/uploader', methods = ['GET', 'POST'])
 def upload_file():

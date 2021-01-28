@@ -2,12 +2,37 @@
 
 {% block content %}
     <div class="upload-form">
-      <form action = "/uploader" method = "POST" 
+      <form action = "/video" method = "POST" 
         enctype = "multipart/form-data">
-        <input type = "file" name = "file" />
-        <input type = "submit"/>
+        <div class="form-group">
+          <label class="control-label col-sm-offset-2 col-sm-2" for="company">Customer</label>
+          <div class="col-sm-6 col-md-4">
+            <select id="company" class="form-control">
+              <option>SELECT</option>
+              <option>WOW!</option>
+              <option>MEDIACOM</option>
+              <option>CISCO</option>
+              <option>FRONTIER</option>
+            </select> 
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label col-sm-offset-2 col-sm-2" for="company">Model</label>
+          <div class="col-sm-6 col-md-4">
+            <select id="model" class="form-control">
+              <option>SELECT</option>
+              <option>MODEL1</option>
+              <option>MODEL2</option>
+              <option>MODEL3</option>
+              <option>MODEL4</option>
+            </select> 
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-6 col-md-4">
+        <input type = "submit" class="btn btn-primary"/>
+        </div>
+        </form>
       </form>
     </div>
-  
-
 {% endblock %}
