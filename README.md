@@ -4,7 +4,7 @@ You can clone this repository or download a zip file, build and run the Docker i
 
 ```
 $ docker build -t ocr-receiving .
-$ docker run -d -p 5000:5000ocr-receiving
+$ docker run -t --device=/dev/video0:/dev/video0 -p 5000:5000 -v ~/ocr-receiving:/app ocr-receiving
 ```
  
 Then open up browser to http://localhost:80
