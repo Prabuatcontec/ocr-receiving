@@ -9,6 +9,8 @@ RUN apt-get -y install tesseract-ocr python-tk
 COPY . /app
 WORKDIR /app
 RUN pip install pillow
+RUN pip install requests
+RUN pip install Flask-Session
 RUN pip install pytesseract
 RUN pip install opencv-contrib-python
 RUN pip install -r requirements.txt
