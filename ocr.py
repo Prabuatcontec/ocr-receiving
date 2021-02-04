@@ -1,7 +1,6 @@
  
 import cv2 
 import pytesseract 
-import Tkinter as tkinter
 import re
 from PIL import Image,ImageTk
 # 1.creating a video object
