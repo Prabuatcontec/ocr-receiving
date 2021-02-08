@@ -13,6 +13,8 @@ RUN apt-get -y install gcc
 RUN apt-get -y install python3-opencv
 COPY . /app
 WORKDIR /app
+RUN pip3 install js2py
+RUN pip3 install selenium
 RUN pip3 install pillow
 RUN pip3 install requests
 RUN pip3 install Flask-Session

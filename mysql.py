@@ -14,8 +14,8 @@ class Connection:
         self.cur=self.db.cursor()
 
     def getCustomer(self):
-        self.cur.execute("select Id, Name from Customers") # This line performs query and returns json result rsundar/
-        # return {'customers': [i[1] for i in self.cur.fetchall()]} # Fetches first column  
+        self.cur.execute("select Id, Name from Customers") 
+            
         rows = [x for x in self.cur]
         cols = [x[0] for x in self.cur.fetchall()]
         customers = []
@@ -27,15 +27,23 @@ class Connection:
         return customers
 
     def getModels(self, customer_id):
-        self.cur.execute("SELECT m.Id,m.Name FROM Automation.CustomerModels  cm LEFT JOIN Automation.Models m ON cm.ModelId = m.Id Where cm.CustomerId =%d" %int(customer_id)) # This line performs query and returns json result
-        # return {'customers': [i[1] for i in self.cur.fetchall()]} # Fetches first column  
+        self.cur.execute("SELECT m.Name,m.Name FROM CustomerModels  cm LEFT JOIN Automation.Models m ON cm.ModelId = m.Id Where cm.CustomerId =%d" %int(customer_id)) 
+        
         rows = [x for x in self.cur]
         cols = [x[0] for x in self.cur.fetchall()]
         models = []
+         
         for row in rows:
             model = {}
+            v = 0  
             for prop, val in zip(cols, row):
-                model[prop] = val
+                v = v+1
+                model[v] = val
             models.append(model)
         # Create a string representation of your array of models. 
         return models
+
+    def getModel(self, model_id):
+        self.cur.execute("SELECT Validation FROM Models Where Name ='%s'" %str(model_id))
+        cols = self.cur.fetchone()
+        return cols[0]

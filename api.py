@@ -9,6 +9,10 @@ def customers():
     responseBody = { "results": Connection().getCustomer() }
     return jsonify(responseBody), 200
 
+@api_blueprint.route('/model/<m_id>')
+def model(m_id):
+    return jsonify(Connection().getModel(m_id)), 200
+
 @api_blueprint.route('/customer/models/<customer_id>')
 def models(customer_id):
     responseBody = { "results": Connection().getModels(customer_id) }

@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, Response, session
+from flask import Flask, flash, render_template, request, Response, session
 from werkzeug import secure_filename
 import os
 import sys
 import pytesseract
+import threading
 import argparse
 import cv2
 import re
@@ -13,12 +14,13 @@ import json
 import login
 from api import api_blueprint
 from mysql import Connection
+from selenium import webdriver 
 __author__ = 'Prabu <mprabu@gocontec.com>'
 __source__ = ''
 
 app = Flask(__name__)
 UPLOAD_FOLDER = './static/uploads'
-API_URL = 'http://api.vulcan.contecprod.com/api/'
+API_URL = 'http://localhost:5000/api/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['API_URL'] = API_URL 
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
@@ -30,15 +32,28 @@ app.register_blueprint(api_blueprint, url_prefix='/api')
 def index():
   return render_template("index.html")
 
-@app.route("/video", methods = ['GET', 'POST'])
+@app.route("/video", methods = ['POST'])
 def about():
-  return render_template("ocr.html")
+  if request.method == 'POST':
+    return render_template("ocr.html" , model= request.form['model'])
 
-def gen(camera):
+def gen(camera, model):
+    response = requests.get(
+            API_URL + 'model/'+model,
+            headers={'Content-Type': 'application/json'}
+        )
+    validation = response.json()
     while True:
-        frame = camera.get_frame()
+        frame = camera.get_frame(model, validation)
+        
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+              b'Content-Type: image/jpeg\r\n\r\n' + frame[0] + b'\r\n\r\n')
+
+def onoff(camera, model):
+    while True:
+        frame = camera.on_off(session["onoff"])
+        yield (b'--frame\r\n'
+              b'Content-Type: image/png\r\n\r\n' + frame + b'\r\n\r\n')
 
 def ocr(camera):
     while True:
@@ -53,7 +68,6 @@ def video_ocr():
                   
 @app.route("/receiving", methods=['GET',"POST"])
 def receiving():
-  if request.method == 'GET':
     response = requests.get(
             API_URL + 'customers',
             headers={'Content-Type': 'application/json'}
@@ -75,11 +89,18 @@ def login():
     return render_template("index.html")
 
 
-@app.route('/video_feed')
-def video_feed():
-  return Response(gen(VideoCamera()),
+@app.route('/video_feed/<string:model>')
+def video_feed(model):
+  return Response(gen(VideoCamera(), model),
+                  mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/on_off')
+def on_off(model):
+  return Response(onoff(VideoCamera(), model),
                   mimetype='multipart/x-mixed-replace; boundary=frame')
  
 if __name__ == '__main__':
   app.secret_key = 'A0Zr98j/3yX R~XHHER!jmN]LWX/,?RT'
+  # t1 = threading.Thread(target=onoff, name='t1') 
+  # t1.start()  
   app.run(host="0.0.0.0", port=5000, debug=True)

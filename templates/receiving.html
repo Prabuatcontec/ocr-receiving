@@ -4,11 +4,11 @@
 
     <div class="upload-form">
       <form action = "/video" method = "POST" 
-        enctype = "multipart/form-data">
+      name="receiving">
         <div class="form-group">
           <label class="control-label col-sm-offset-2 col-sm-2" for="company">Customer</label>
           <div class="col-sm-6 col-md-4">
-            <select id="customer" class="form-control">
+            <select id="customer" name="customer" class="form-control">
               <option>SELECT</option>
               {% for col in customers %}
               <option value="{{ col['1'] }}">{{ col['2'] }}</option>
@@ -19,7 +19,7 @@
         <div class="form-group">
           <label class="control-label col-sm-offset-2 col-sm-2" for="company">Model</label>
           <div class="col-sm-6 col-md-4">
-            <select id="model" class="form-control">
+            <select id="model"  name="model" class="form-control">
               <option>SELECT</option>
             </select> 
           </div>
@@ -34,25 +34,25 @@
     <script  type="text/javascript">
     $(document).ready(function(){ 
         $("select#customer").change(function() {
-            var customerId = $(this).find('option:selected').val();
+          $('#model').find('option:not(:first)').remove();
+          var customerId = $(this).find('option:selected').val();
+          $.ajax({
+              type: 'GET',
+              url: "api/customer/models/"+ customerId,
+              data: {  },
+              contentType: 'application/json',
+              dataType: 'json',
+              success: function(response) {
+                $.each(response['results'], function (key, value) {
+                  $("#model").append($('<option>', {
+                      value: value['1'],
+                      text: value['2'],
+                      'data-mark': value['1']
+                  }));
+                });
 
-            $.ajax({
-                type: 'GET',
-                url: "api/customer/models/"+ customerId,
-                data: {  },
-                contentType: 'application/json',
-                dataType: 'json',
-                success: function(response) {
-                  $.each(response['results'], function (key, value) {
-                    $("#model").append($('<option>', {
-                        value: value['1'],
-                        text: value['3'],
-                        'data-mark': value['1']
-                    }));
-                  });
-
-                }
-            });
+              }
+          });
         });
       });
     </script> 

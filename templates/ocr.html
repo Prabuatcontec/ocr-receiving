@@ -1,11 +1,21 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<div>{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class=flashes>
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %} </div>
     <div class="ocr_head"><h2>OCR Receiving</h2></div><div class="ocr_head_button" >
         <a href="{{ url_for('login') }}" class="btn btn-primary">Next Batch</a>
         {{value}}
     </div>
-    <div class="ocr_body"><img class="ocr_bg" class="center" src="{{ url_for('video_feed') }}"> 
+    <div class="ocr_body"><img class="ocr_bg" class="center" src="{{ url_for('video_feed', model=model, validation=validation) }}" />  
+        
     </div>
-
+ 
 {% endblock %}
