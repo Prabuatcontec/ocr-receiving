@@ -15,17 +15,12 @@ import login
 from api import api_blueprint
 from mysql import Connection
 from selenium import webdriver 
+from config import Config
+from filehandling import HoldStatus
 __author__ = 'Prabu <mprabu@gocontec.com>'
 __source__ = ''
 
 app = Flask(__name__)
-UPLOAD_FOLDER = './static/uploads/'
-API_URL = 'http://localhost:5000/api/'
-API_USER_URL = 'http://api.vulcan.contecprod.com/api/'
-app.config['API_URL'] = API_URL 
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
-app.config['UPLOAD_FOLDER'] = API_URL 
-
 
 app.register_blueprint(api_blueprint, url_prefix='/api')
 import jyserver.Flask as jsf
@@ -35,9 +30,7 @@ class App:
         self.count = 0
     def increment(self):
         self.count += 1
-        file = open(UPLOAD_FOLDER+str(session['user'])+ "_copy.txt", "w") 
-        file.write(str(self.count)) 
-        file.close() 
+        HoldStatus().readFile(self.count)
         self.js.document.getElementById("count").innerHTML = self.count
 
 @app.route("/")
@@ -51,7 +44,7 @@ def about():
 
 def gen(camera, model):
     response = requests.get(
-            API_URL + 'model/'+model,
+            Config.API_URL + 'model/'+model,
             headers={'Content-Type': 'application/json'}
         )
     validation = response.json()
@@ -82,13 +75,13 @@ def video_ocr():
 def receiving():
   if request.method == 'POST':
     response = requests.post(
-            API_USER_URL + 'users/login', data=json.dumps({"username": request.form['username'],"password": request.form['password'],"Site":"Matamoros"}),
+            Config.API_USER_URL + 'users/login', data=json.dumps({"username": request.form['username'],"password": request.form['password'],"Site":"Matamoros"}),
             headers={'Content-Type': 'application/json'}
         ) 
     a = response.json()
     session['user'] = a['user']['userName']
     response = requests.get(
-            API_URL + 'customers',
+            Config.API_URL + 'customers',
             headers={'Content-Type': 'application/json'}
         )
     a = response.json()
@@ -98,13 +91,13 @@ def receiving():
 def login():
   if request.method == 'POST':
     response = requests.post(
-            API_USER_URL + 'users/login', data=json.dumps({"username": request.form['username'],"password": request.form['password'],"Site":"Matamoros"}),
+            Config.API_USER_URL + 'users/login', data=json.dumps({"username": request.form['username'],"password": request.form['password'],"Site":"Matamoros"}),
             headers={'Content-Type': 'application/json'}
         ) 
     a = response.json()
     session['user'] = a['user']['userName']
     response = requests.get(
-            API_URL + 'customers',
+            Config.API_URL + 'customers',
             headers={'Content-Type': 'application/json'}
         )
     a = response.json()

@@ -6,10 +6,10 @@ class Connection:
     def __init__(self):
         self.db=MySQLdb.connect(
             Config.DATABASE_CONFIG['server'],
-            "VulcanWebUser",
-            "Vulcan123",
-            "Automation"
-            )
+            Config.DATABASE_CONFIG['user'],
+            Config.DATABASE_CONFIG['password'],
+            Config.DATABASE_CONFIG['name']
+        )
         self.db.autocommit(True)
         self.db.set_character_set('utf8mb4')
         self.cur=self.db.cursor()
@@ -41,7 +41,6 @@ class Connection:
                 v = v+1
                 model[v] = val
             models.append(model)
-        # Create a string representation of your array of models. 
         return models
 
     def getModel(self, model_id):

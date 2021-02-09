@@ -5,4 +5,7 @@ class Config(object):
         'password': 'Vulcan123',
         'name': 'Automation',
     }
+    UPLOAD_FOLDER = './static/uploads/'
+    API_URL = 'http://localhost:5000/api/'
+    API_USER_URL = 'http://api.vulcan.contecprod.com/api/'    
 
