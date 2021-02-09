@@ -154,3 +154,7 @@ header img {
     margin: -100px 0 0 -150px;
   }
 
+  .disab {
+    display: none !important;
+  }
+

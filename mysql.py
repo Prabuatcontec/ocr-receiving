@@ -1,10 +1,11 @@
 import MySQLdb
 import json
+from config import Config
 
 class Connection:
     def __init__(self):
         self.db=MySQLdb.connect(
-            "crs-dev.rds.gocontec.com",
+            Config.DATABASE_CONFIG['server'],
             "VulcanWebUser",
             "Vulcan123",
             "Automation"

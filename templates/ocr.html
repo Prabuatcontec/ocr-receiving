@@ -1,15 +1,9 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div>{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <ul class=flashes>
-      {% for category, message in messages %}
-        <li class="{{ category }}">{{ message }}</li>
-      {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %} </div>
+
+<p id="count">0</p>
+<button id="checkStatus" onclick="server.increment()" style="display: none;">Increase</button>
     <div class="ocr_head"><h2>OCR Receiving</h2></div><div class="ocr_head_button" >
         <a href="{{ url_for('login') }}" class="btn btn-primary">Next Batch</a>
         {{value}}
@@ -17,5 +11,15 @@
     <div class="ocr_body"><img class="ocr_bg" class="center" src="{{ url_for('video_feed', model=model, validation=validation) }}" />  
         
     </div>
- 
+    <ul>
+      <li>Label Found: <span id="label_"></span></li>
+      <li>Dc Status: <span id="dc_"></span></li>
+    </ul>
+    <script  type="text/javascript">
+      $(document).ready(function(){ 
+        setInterval(function(){ 
+          $("#checkStatus").click();
+        },2000);
+      });
+      </script> 
 {% endblock %}

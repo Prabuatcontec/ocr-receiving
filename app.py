@@ -19,14 +19,26 @@ __author__ = 'Prabu <mprabu@gocontec.com>'
 __source__ = ''
 
 app = Flask(__name__)
-UPLOAD_FOLDER = './static/uploads'
+UPLOAD_FOLDER = './static/uploads/'
 API_URL = 'http://localhost:5000/api/'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+API_USER_URL = 'http://api.vulcan.contecprod.com/api/'
 app.config['API_URL'] = API_URL 
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
+app.config['UPLOAD_FOLDER'] = API_URL 
 
 
 app.register_blueprint(api_blueprint, url_prefix='/api')
+import jyserver.Flask as jsf
+@jsf.use(app)
+class App:
+    def __init__(self):
+        self.count = 0
+    def increment(self):
+        self.count += 1
+        file = open(UPLOAD_FOLDER+str(session['user'])+ "_copy.txt", "w") 
+        file.write(str(self.count)) 
+        file.close() 
+        self.js.document.getElementById("count").innerHTML = self.count
 
 @app.route("/")
 def index():
@@ -35,7 +47,7 @@ def index():
 @app.route("/video", methods = ['POST'])
 def about():
   if request.method == 'POST':
-    return render_template("ocr.html" , model= request.form['model'])
+    return App.render(render_template("ocr.html" , model= request.form['model']))
 
 def gen(camera, model):
     response = requests.get(
@@ -68,23 +80,35 @@ def video_ocr():
                   
 @app.route("/receiving", methods=['GET',"POST"])
 def receiving():
+  if request.method == 'POST':
+    response = requests.post(
+            API_USER_URL + 'users/login', data=json.dumps({"username": request.form['username'],"password": request.form['password'],"Site":"Matamoros"}),
+            headers={'Content-Type': 'application/json'}
+        ) 
+    a = response.json()
+    session['user'] = a['user']['userName']
     response = requests.get(
             API_URL + 'customers',
             headers={'Content-Type': 'application/json'}
         )
     a = response.json()
-    return  render_template("receiving.html", customers=a['results'])
+    return  render_template("receiving.html", customers=a['results'], user=session['user'])
 
 @app.route("/login", methods=['GET',"POST"])
 def login():
   if request.method == 'POST':
     response = requests.post(
-            API_URL + 'users/login', data=json.dumps({"username":"2223","password":"qewqeqw","Site":"Matamoros"}),
+            API_USER_URL + 'users/login', data=json.dumps({"username": request.form['username'],"password": request.form['password'],"Site":"Matamoros"}),
+            headers={'Content-Type': 'application/json'}
+        ) 
+    a = response.json()
+    session['user'] = a['user']['userName']
+    response = requests.get(
+            API_URL + 'customers',
             headers={'Content-Type': 'application/json'}
         )
-    # a = response.json()
-    # session['token'] = a['user']['jwtToken']
-    return  render_template("receiving.html")
+    a = response.json()
+    return  render_template("receiving.html", user=session['user'], customers=a['results'])
   if request.method == 'GET':
     return render_template("index.html")
 
