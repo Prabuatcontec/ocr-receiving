@@ -27,11 +27,20 @@ import jyserver.Flask as jsf
 @jsf.use(app)
 class App:
     def __init__(self):
-        self.count = 0
+        self.count = 5
     def increment(self):
-        self.count += 1
-        HoldStatus().readFile(self.count)
-        self.js.document.getElementById("count").innerHTML = self.count
+        r = HoldStatus(self.js.document.getElementById("user").innerHTML).readFile("_scan")
+        if r == "1":
+            self.js.document.getElementById("on_status").style.display = "none"
+            self.js.document.getElementById("off_status").style.display = "block"
+        else:
+            self.js.document.getElementById("on_status").style.display = "block"
+            self.js.document.getElementById("off_status").style.display = "none"
+
+        r = HoldStatus(self.js.document.getElementById("user").innerHTML).readFile("_serial")
+        self.js.document.getElementById("dc_").innerHTML = r
+
+        
 
 @app.route("/")
 def index():
@@ -40,16 +49,18 @@ def index():
 @app.route("/video", methods = ['POST'])
 def about():
   if request.method == 'POST':
-    return App.render(render_template("ocr.html" , model= request.form['model']))
+    HoldStatus(session['user']).writeFile("-","_serial")
+    HoldStatus(session['user']).writeFile("0","_scan")
+    return App.render(render_template("ocr.html" , model= request.form['model'], user=session['user']))
 
-def gen(camera, model):
+def gen(camera, model, user):
     response = requests.get(
             Config.API_URL + 'model/'+model,
             headers={'Content-Type': 'application/json'}
         )
     validation = response.json()
     while True:
-        frame = camera.get_frame(model, validation)
+        frame = camera.get_frame(model, validation, user)
         
         yield (b'--frame\r\n'
               b'Content-Type: image/jpeg\r\n\r\n' + frame[0] + b'\r\n\r\n')
@@ -85,6 +96,7 @@ def receiving():
             headers={'Content-Type': 'application/json'}
         )
     a = response.json()
+    
     return  render_template("receiving.html", customers=a['results'], user=session['user'])
 
 @app.route("/login", methods=['GET',"POST"])
@@ -106,9 +118,9 @@ def login():
     return render_template("index.html")
 
 
-@app.route('/video_feed/<string:model>')
-def video_feed(model):
-  return Response(gen(VideoCamera(), model),
+@app.route('/video_feed/<string:model>/<string:user>')
+def video_feed(model, user):
+  return Response(gen(VideoCamera(), model, user),
                   mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/on_off')

@@ -13,6 +13,7 @@ import calendar
 import time
 from mysql import Connection
 from modelunitvalidation import ModelValidation
+from filehandling import HoldStatus
 ds_factor=0.6
 
 class VideoCamera(object):
@@ -35,7 +36,7 @@ class VideoCamera(object):
         img_byte_arr = img_byte_arr.getvalue()
         return img_byte_arr
     
-    def get_frame(self, model, validation):
+    def get_frame(self, model, validation, user):
         success, image = self.video.read()
         gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         ret, jpeg = cv2.imencode('.jpg', image)
@@ -47,26 +48,30 @@ class VideoCamera(object):
                 text = pytesseract.image_to_string(Image.open("static/uploads/box_111.jpg"))
                 text = text.replace('\n','')
                 gmt = time.gmtime()
-                print('Serial:', text) 
-                print('Model:', model) 
+                counts = 0
                 if text.find(model) >=0:
                     jsonArray = json.loads(str(validation))
-                    print(jsonArray["dcCount"])  
-                    return [jpeg.tobytes(), 1]
+                    counts = jsonArray["dcCount"]
  
                 ts = calendar.timegm(gmt) 
                 cv2.imwrite("static/uploads/box_%d.jpg" % ts, image)
                 barcodeImage = cv2.imread("static/uploads/box_111.jpg")
                 barcodes = pyzbar.decode(barcodeImage)
+                if counts > 0 and counts != len(barcodes):
+                    HoldStatus(user).writeFile("1", "_scan")
+                count = 0
+                serials = []
                 for barcode in barcodes:      
                     (x, y, w, h) = barcode.rect
                     cv2.rectangle(barcodeImage, (x, y), (x + w, y + h), (0, 0, 255), 2)
                     barcodeData = barcode.data.decode("utf-8")  
+                    serials.append(barcodeData)
+                    count = count + 1
                     barcodeType = barcode.type
                     text = "{} ({})".format(barcodeData, barcodeType)
                     cv2.putText(barcodeImage, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX,
                         0.5, (0, 0, 255), 2)
-                    print("[INFO] Found {} barcode: {} ==== {}".format(barcodeType, barcodeData, y))
+                HoldStatus(user).writeFile(json.dumps(serials), "_serial")
         return [jpeg.tobytes(), 0]
     
     def get_ocr(self):

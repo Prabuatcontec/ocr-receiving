@@ -3,16 +3,18 @@
 {% block content %}
 
 <p id="count">0</p>
-<button id="checkStatus" onclick="server.increment()" style="display: none;">Increase</button>
+<button id="checkStatus" onclick="server.increment()" style="display: none;">0</button>
+<div id="user">{{user}}</div>
     <div class="ocr_head"><h2>OCR Receiving</h2></div><div class="ocr_head_button" >
         <a href="{{ url_for('login') }}" class="btn btn-primary">Next Batch</a>
         {{value}}
     </div>
-    <div class="ocr_body"><img class="ocr_bg" class="center" src="{{ url_for('video_feed', model=model, validation=validation) }}" />  
+    <div class="ocr_body"><img class="ocr_bg" class="center" src="{{ url_for('video_feed', model=model, user=user) }}" />  
         
     </div>
     <ul>
-      <li>Label Found: <span id="label_"></span></li>
+      <li>Label Found: <span id="label_"><img src="static/img/off.png" id="off_status" class="statusLabel" />
+        <img src="static/img/on.jpeg" id="on_status" class="statusLabel" /></span></li>
       <li>Dc Status: <span id="dc_"></span></li>
     </ul>
     <script  type="text/javascript">
