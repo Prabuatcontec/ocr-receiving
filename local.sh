@@ -54,6 +54,7 @@ function tl_status {
     git pull
     docker pull prabuatcontec/ocr-receiving
     docker-compose -f docker-compose.yml up --build
+
     fi
 }
 
@@ -100,6 +101,7 @@ case $TL_ACTION in
   status)
 
     tl_status $@
+
 
     ;;
 

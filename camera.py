@@ -59,7 +59,7 @@ class VideoCamera(object):
                 barcodes = pyzbar.decode(barcodeImage)
                 if counts > 0 and counts != len(barcodes):
                     HoldStatus(user).writeFile("1", "_scan")
-                count = 0
+                count = 0 
                 serials = []
                 for barcode in barcodes:      
                     (x, y, w, h) = barcode.rect
