@@ -7,5 +7,6 @@ class Config(object):
     }
     UPLOAD_FOLDER = './static/uploads/'
     API_URL = 'http://localhost:5000/api/'
-    API_USER_URL = 'http://api.vulcan.contecprod.com/api/'    
+    API_USER_URL = 'http://api.vulcan.contecprod.com/api/'
+    REPO_PATH = 'https://github.com/Prabuatcontec/ocr-receiving'
 

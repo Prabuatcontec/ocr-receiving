@@ -11,8 +11,10 @@ RUN apt-get -y install python3-tk
 RUN apt-get -y install libmysqlclient-dev
 RUN apt-get -y install gcc
 RUN apt-get -y install python3-opencv
+RUN apt install -y git
 COPY . /app
 WORKDIR /app
+RUN pip3 install gitpython
 RUN pip3 install jyserver
 RUN pip3 install selenium
 RUN pip3 install pillow
