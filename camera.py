@@ -44,8 +44,8 @@ class VideoCamera(object):
         if ret:
             if text.find('Model') >= 0:
                 #time.sleep(1.0) 
-                #text = pytesseract.image_to_string(Image.fromarray(gray))
-                text = pytesseract.image_to_string(Image.open("static/uploads/box_111.jpg"))
+                text = pytesseract.image_to_string(Image.fromarray(gray))
+                #text = pytesseract.image_to_string(Image.open("static/uploads/box_111.jpg"))
                 text = text.replace('\n','')
                 gmt = time.gmtime()
                 counts = 0
@@ -55,7 +55,7 @@ class VideoCamera(object):
  
                 ts = calendar.timegm(gmt) 
                 cv2.imwrite("static/uploads/box_%d.jpg" % ts, image)
-                barcodeImage = cv2.imread("static/uploads/box_111.jpg")
+                barcodeImage = cv2.imread("static/uploads/box_%d.jpg" % ts)
                 barcodes = pyzbar.decode(barcodeImage)
                 if counts > 0 and counts != len(barcodes):
                     HoldStatus(user).writeFile("1", "_scan")
