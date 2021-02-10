@@ -1,0 +1,128 @@
+#!/bin/bash
+
+
+
+# ----------------------------------------------------------------------------------------------#
+
+# Update TL_BASE variable to match your project folder                                          #
+
+# This script expects all  related repositories under same project folder.            #
+
+# ----------------------------------------------------------------------------------------------#
+
+TL_BASE="/ocr-receiving"
+
+function tl_help {
+
+    echo "====================================================================================="
+
+    echo "USAGE   ./local.sh <Options> (i.e) ./local.sh up"
+
+    echo "====================================================================================="
+
+    echo "up            	# To start   environment" 
+    echo "down-all      	# To stop entire dev including data/portainer environment"
+
+    echo "network	    	# To create tvl-datanet network"
+
+    echo "restart-ng    	# To restart NG containers only"
+
+    echo "restart-search	# To restart Search (tl-web) containers only"
+
+    echo "restart       	# To restart dev containers except data/portainer"
+
+    echo "pull          	# Pull latest changes from GIT"
+
+}
+
+function tl_init {
+
+	sudo mkdir -p $TL_BASE
+
+	sudo chmod -R 777 $TL_BASE
+
+	echo $TL_BASE
+
+} 
+
+function tl_commitid {
+
+    # x="git rev-parse HEAD"
+    # y="sudo git ls-remote --heads https://github.com/Prabuatcontec/ocr-receiving.git"
+    # a=${stringZ:5:10}
+    # eval "$x"
+    #diff <(git rev-parse HEAD) <(sudo git ls-remote --heads https://github.com/Prabuatcontec/ocr-receiving.git)
+    #bcompare (sudo git rev-parse HEAD) (sudo git ls-remote --heads https://github.com/Prabuatcontec/ocr-receiving.git)
+
+    if diff <(git rev-parse HEAD) <(sudo git ls-remote --heads https://github.com/Prabuatcontec/ocr-receiving.git); then
+    echo All equal
+    else
+    echo Not
+    fi
+}
+
+function tl_clone {
+	cd $TL_BASE
+}
+
+function tl_build {
+	docker pull prabuatcontec/ocr-receiving
+}
+
+function tl_up {
+	sudo docker-compose -f docker-compose.yml up --build
+}
+
+# set action
+
+if [ -n "$1" ]; then
+
+  TL_ACTION=$1
+
+else
+
+  TL_ACTION=help
+
+fi
+
+
+case $TL_ACTION in
+
+  help)
+
+    tl_help $@
+
+    ;;
+
+  init)
+
+    tl_init $@
+
+    ;;
+
+
+  commitid)
+
+    tl_commitid $@
+
+    ;;
+
+  up)
+
+    tl_up $@
+
+    ;;
+
+  pull)
+
+    tl_gitpull $@
+
+    ;;
+
+  *)
+
+    tl_error "Unknown action $TL_ACTION"
+
+    tl_help
+
+esac
