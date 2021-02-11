@@ -2,25 +2,23 @@
  * General
  */
 
-
-
 body {
   background-color: #f4f4f4;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
 }
 
 .ocr_bg {
   display: block;
   margin-left: auto;
   margin-right: auto;
-  width: 50%
+  width: 50%;
 }
 /* 
  * Header
  */
 
 header {
-  background-color: #2D323E !important;
+  background-color: #2d323e !important;
   height: 60px;
   color: #ffffff !important;
 }
@@ -35,33 +33,33 @@ header h1 {
 
 header img {
   height: 40px;
-  float:left;
+  float: left;
   margin-top: 10px;
 }
 
-
 .title {
   float: left;
-  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
   font-size: 17px;
   letter-spacing: 2.5px;
   text-transform: uppercase;
   margin: 20px 10px;
 }
 
-.title a, .title a:visited {
+.title a,
+.title a:visited {
   color: #3a3a3a;
 }
 
-.ocr_head{
+.ocr_head {
   float: left;
   width: 40%;
 }
-.ocr_head_button{
+.ocr_head_button {
   float: right;
   margin-left: 1%;
 }
-.ocr_body{
+.ocr_body {
   clear: both;
 }
 
@@ -75,50 +73,50 @@ header img {
 
 * {
   box-sizing: border-box;
-  }
-  
-  *:focus {
+}
+
+*:focus {
   outline: none;
-  }
-  
-  .login-screen {
-  background-color: #FFF;
+}
+
+.login-screen {
+  background-color: #fff;
   padding: 20px;
-  border-radius: 5px
-  }
-  
-  .app-title {
+  border-radius: 5px;
+}
+
+.app-title {
   text-align: center;
   color: #777;
-  }
-  
-  .login-form {
+}
+
+.login-form {
   text-align: center;
-  }
-  .control-group {
+}
+.control-group {
   margin-bottom: 10px;
-  }
-  
-  input {
+}
+
+input {
   text-align: center;
-  background-color: #ECF0F1;
+  background-color: #ecf0f1;
   border: 2px solid transparent;
   border-radius: 3px;
   font-size: 16px;
   font-weight: 200;
   padding: 10px 0;
   width: 250px;
-  transition: border .5s;
-  }
-  
-  input:focus {
-  border: 2px solid #3498DB;
+  transition: border 0.5s;
+}
+
+input:focus {
+  border: 2px solid #3498db;
   box-shadow: none;
-  }
-  
-  .btn {
+}
+
+.btn {
   border: 2px solid transparent;
-  background: #3498DB;
+  background: #3498db;
   color: #ffffff;
   font-size: 16px;
   line-height: 25px;
@@ -129,37 +127,149 @@ header img {
   box-shadow: none;
   transition: 0.25s;
   display: block;
-  width: 250px;
+  width: 125px;
   margin: 0 auto;
-  }
-  
-  .btn:hover {
-  background-color: #2980B9;
-  }
-  
-  .login-link {
+}
+
+.btn:hover {
+  background-color: #2980b9;
+}
+
+.login-link {
   font-size: 12px;
   color: #444;
   display: block;
   margin-top: 12px;
-  }
+}
 
-  #loginPopUp {
-    position: absolute;
-    width: 300px !important;
-    height: 200px !important;
-    z-index: 15;
-    top: 50%;
-    left: 50%;
-    margin: -100px 0 0 -150px;
-  }
+#centerDiv {
+  position: absolute;
+  width: 300px !important;
+  height: 200px !important;
+  z-index: 15;
+  top: 50%;
+  left: 50%;
+  margin: -100px 0 0 -150px;
+}
 
-  .disab {
-    display: none !important;
-  }
+.disab {
+  display: none !important;
+}
 
-  .statusLabel {
-    width: 40px;
-    height: 40px;
-  }
+.statusLabel {
+  width: 40px;
+  height: 40px;
+}
+ 
 
+.login-logo,
+.form-container {
+  margin: 0 auto;
+  max-width: 25em;
+  transition: all 0.5s ease-in-out;
+}
+
+.off-canvas {
+  transform: translateZ(0) translate(0, -400px) rotateY(-360deg);
+  height: 0;
+}
+
+.login-logo {
+  padding: 1em;
+  img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+.form-container {
+  background: white;
+  padding: 1.5em;
+  border-radius: 1em;
+  box-shadow: 0px 0px 1em #ddd;
+  h2 {
+    margin-top: 0;
+    color: #008cba;
+  }
+  .error {
+    color: red;
+    margin: 0.5em 0;
+  }
+  label span {
+    color: #d9534f;
+  }
+  button {
+    background: #008cba;
+    &:hover {
+      background: darken(#008cba, 5%);
+    }
+  }
+}
+
+html {
+  box-sizing: border-box;
+}
+*,
+:before,
+:after {
+  box-sizing: inherit;
+}
+
+body {
+  background: #eee;
+  font-family: "Open Sans", sans-serif;
+}
+
+#logout {
+  float: right;
+  padding: 15px;
+  color: orange;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+#uname {
+  float: right;
+  padding: 15px 0px;
+  color: #008cba;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+
+#overlay {
+  background: #ffffff;
+  color: #666666;
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  z-index: 5000;
+  top: 0;
+  left: 0;
+  float: left;
+  text-align: center;
+  padding-top: 25%;
+  opacity: .80;
+}
+button {
+  margin: 40px;
+  padding: 5px 20px;
+  cursor: pointer;
+}
+.spinner {
+    margin: 0 auto;
+    height: 64px;
+    width: 64px;
+    animation: rotate 0.8s infinite linear;
+    border: 5px solid orange;
+    border-right-color: transparent;
+    border-radius: 50%;
+}
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

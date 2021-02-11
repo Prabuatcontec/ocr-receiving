@@ -5,25 +5,21 @@
   0
 </button>
 <div id="user">{{user}}</div>
-<div class="ocr_head"><h2>OCR Receiving</h2></div>
+<div class="ocr_head">
+  <h2>OCR Receiving</h2>
+</div>
 <div class="ocr_head_button">
   <a href="" class="btn btn-primary">Next Batch</a>
   {{value}}
 </div>
 <div class="ocr_body">
-  <img
-    class="ocr_bg"
-    class="center"
-    src="{{ url_for('video_feed', model=model, user=user) }}"
-  />
+  <img class="ocr_bg" class="center" src="{{ url_for('video_feed', model=model, user=user) }}" />
 </div>
 <ul>
   <li>
     Label Found:
-    <span id="label_"
-      ><img src="static/img/off.png" id="off_status" class="statusLabel" />
-      <img src="static/img/on.jpeg" id="on_status" class="statusLabel"
-    /></span>
+    <span id="label_"><img src="static/img/off.png" id="off_status" class="statusLabel" />
+      <img src="static/img/on.jpeg" id="on_status" class="statusLabel" /></span>
   </li>
   <li>Dc Status: <span id="dc_"></span></li>
 </ul>

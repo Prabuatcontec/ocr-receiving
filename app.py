@@ -1,6 +1,7 @@
 import jyserver.Flask as jsf
 from flask import Flask, flash, render_template, request, Response, session
 from werkzeug import secure_filename
+from requests.auth import HTTPBasicAuth
 import os
 import sys
 import pytesseract
@@ -70,29 +71,11 @@ def gen(camera, model, user):
 
 
 @app.route("/video", methods=['POST'])
-def about():
+def ocr():
     if request.method == 'POST':
         HoldStatus(session['user']).writeFile("-", "_serial")
         HoldStatus(session['user']).writeFile("0", "_scan")
         return App.render(render_template("ocr.html", model=request.form['model'], user=session['user']))
-
-
-@app.route("/receiving", methods=['GET', "POST"])
-def receiving():
-    if request.method == 'POST':
-        response = requests.post(
-            Config.API_USER_URL + 'users/login', data=json.dumps({"username": request.form['username'], "password": request.form['password'], "Site": "Matamoros"}),
-            headers={'Content-Type': 'application/json'}
-        )
-        a = response.json()
-        session['user'] = a['user']['userName']
-        response = requests.get(
-            Config.API_URL + 'customers',
-            headers={'Content-Type': 'application/json'}
-        )
-        a = response.json()
-
-        return render_template("receiving.html", customers=a['results'], user=session['user'])
 
 
 if __name__ == '__main__':

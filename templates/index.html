@@ -1,42 +1,57 @@
-{% extends "layout.html" %} {% block content %}
-<div id="loginPopUp">
-  <div class="upload-form">
-    <form action="/receiving" method="POST">
-      <div class="login">
-        <div class="login-screen">
-          <div class="app-title">
-            <h1>Login</h1>
-          </div>
-          <div class="login-form">
-            <div class="form-group">
-              <input
-                type="text"
-                class="form-control"
-                value=""
-                placeholder="Username"
-                name="username"
-              />
-              <label class="login-field-icon fui-user" for="login-name"></label>
-            </div>
-            <div class="form-group">
-              <input
-                type="password"
-                class="form-control"
-                value=""
-                placeholder="Password"
-                name="password"
-              />
-              <label class="login-field-icon fui-lock" for="login-pass"></label>
-            </div>
-            <input
-              type="submit"
-              value="Log in"
-              class="btn btn-primary btn-large btn-block"
-            />
-          </div>
+{% extends "layout.html" %} {% block content %} {% if error %}
+<div class="alert alert-danger alert-dismissible ">{{error}}</div>
+{% endif %}
+<div id="centerDiv">
+  <div class="container upload-form login">
+    <div class="form-container off-canvas">
+      <div class="login-screen">
+        <div class="app-title">
+          <h1>Login</h1>
         </div>
+        <form role="form" class="form-signin" action="/receiving" method="POST">
+          <div class="form-group">
+            <input placeholder="Username" type="text" class="form-control" name="username" id="username"
+              aria-required="true" aria-invalid="true" required />
+          </div>
+
+          <div class="form-group">
+            <input placeholder="Password" type="password" class="form-control" name="password" id="password"
+              aria-required="true" aria-invalid="true" required />
+          </div>
+
+          <button class="btn btn-lg btn-primary btn-block" type="submit">
+            Sign in
+          </button>
+        </form>
       </div>
-    </form>
+    </div>
   </div>
 </div>
+
+<script type="text/javascript">
+  $('.alert').delay(3000).fadeOut();
+  var $loginForm = $(".form-signin"),
+    $login_text_fields = $loginForm.find("input[type='text']");
+
+  $(".login-logo,.form-container").removeClass("off-canvas");
+
+  $loginForm.validate({
+    errorElement: "span",
+    success: function (label) {
+      _form_success_aria(label);
+    },
+    invalidHandler: function (event, validator) {
+      _form_error_aria(event);
+    },
+  });
+
+  function _form_success_aria(label) {
+    var target = label.parent().find("input");
+    target.attr("aria-invalid", "false");
+  }
+
+  function _form_error_aria(validator) {
+    console.log(validator.target.elements[0]);
+  }
+</script>
 {% endblock %}
