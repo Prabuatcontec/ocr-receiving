@@ -4,7 +4,7 @@ import argparse
 import cv2
 import tkinter
 import re
-from PIL import Image,ImageTk
+from PIL import Image, ImageTk
 from pyzbar import pyzbar
 from flask import session
 import json
@@ -16,7 +16,8 @@ from config import Config
 import os.path
 from os import path
 
-ds_factor=0.6
+ds_factor = 0.6
+
 
 class HoldStatus(object):
     def __init__(self, user):
@@ -28,7 +29,8 @@ class HoldStatus(object):
         file.close()
 
     def readFile(self, name):
-        file = open(Config.UPLOAD_FOLDER+str(self.user)+ str(name) + ".txt", "r")
+        file = open(Config.UPLOAD_FOLDER+str(self.user) +
+                    str(name) + ".txt", "r")
         r = file.read()
         file.close()
         return r

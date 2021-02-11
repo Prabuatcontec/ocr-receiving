@@ -2,9 +2,10 @@ import MySQLdb
 import json
 from config import Config
 
+
 class Connection:
     def __init__(self):
-        self.db=MySQLdb.connect(
+        self.db = MySQLdb.connect(
             Config.DATABASE_CONFIG['server'],
             Config.DATABASE_CONFIG['user'],
             Config.DATABASE_CONFIG['password'],
@@ -12,11 +13,11 @@ class Connection:
         )
         self.db.autocommit(True)
         self.db.set_character_set('utf8mb4')
-        self.cur=self.db.cursor()
+        self.cur = self.db.cursor()
 
     def getCustomer(self):
-        self.cur.execute("select Id, Name from Customers") 
-            
+        self.cur.execute("select Id, Name from Customers")
+
         rows = [x for x in self.cur]
         cols = [x[0] for x in self.cur.fetchall()]
         customers = []
@@ -28,15 +29,16 @@ class Connection:
         return customers
 
     def getModels(self, customer_id):
-        self.cur.execute("SELECT m.Name,m.Name FROM CustomerModels  cm LEFT JOIN Automation.Models m ON cm.ModelId = m.Id Where cm.CustomerId =%d" %int(customer_id)) 
-        
+        self.cur.execute(
+            "SELECT m.Name,m.Name FROM CustomerModels  cm LEFT JOIN Automation.Models m ON cm.ModelId = m.Id Where cm.CustomerId =%d" % int(customer_id))
+
         rows = [x for x in self.cur]
         cols = [x[0] for x in self.cur.fetchall()]
         models = []
-         
+
         for row in rows:
             model = {}
-            v = 0  
+            v = 0
             for prop, val in zip(cols, row):
                 v = v+1
                 model[v] = val
@@ -44,6 +46,7 @@ class Connection:
         return models
 
     def getModel(self, model_id):
-        self.cur.execute("SELECT Validation FROM Models Where Name ='%s'" %str(model_id))
+        self.cur.execute(
+            "SELECT Validation FROM Models Where Name ='%s'" % str(model_id))
         cols = self.cur.fetchone()
         return cols[0]
