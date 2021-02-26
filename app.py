@@ -53,19 +53,19 @@ class App:
 #background process happening without any refreshing
 @app.route('/background_process_enable/<string:val>')
 def background_process_enable(val):
-    HoldStatus("0").writeFile(val,"_update")    
+    HoldStatus("0").writeFile(val,"_update")
     return ('{"nothing":1}')
 
 
-@app.route('/video_feed/<string:model>/<string:user>/<string:validation>')
-def video_feed(model, user, validation):
-    return Response(gen(VideoCamera(), model, user, validation),
+@app.route('/video_feed/<string:validation>/<string:user>')
+def video_feed(validation, user):
+    return Response(gen(VideoCamera(), validation, user),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-def gen(camera, model, user, validation):
+def gen(camera, validation, user):
     while True:
-        frame = camera.get_frame(model, validation, user)
+        frame = camera.get_frame(validation, user)
 
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame[0] + b'\r\n\r\n')
@@ -76,7 +76,7 @@ def ocr():
     if request.method == 'POST':
         HoldStatus(session['user']).writeFile("-", "_serial")
         HoldStatus(session['user']).writeFile("0", "_scan")
-        return App.render(render_template("ocr.html", model=request.form['model'], user=session['user'], validation=json.dumps(request.form['validation'])))
+        return App.render(render_template("ocr.html", customer=request.form['customer'], validation=request.form['validation'], user=session['user'] ))
 
 
 if __name__ == '__main__':

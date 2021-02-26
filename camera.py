@@ -43,7 +43,7 @@ class VideoCamera(object):
         img_byte_arr = img_byte_arr.getvalue()
         return img_byte_arr
 
-    def get_frame(self, model, validation, user):
+    def get_frame(self, validation, user):
         success, image = self.video.read()
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         ret, jpeg = cv2.imencode('.jpg', image)
@@ -51,15 +51,20 @@ class VideoCamera(object):
         if ret:
             if text.find('Model') >= 0:
                 # time.sleep(1.0)
+                models = json.loads(validation)
                 text = pytesseract.image_to_string(Image.fromarray(gray))
                 text = pytesseract.image_to_string(Image.open("static/uploads/box_111.jpg"))
                 #self.deskew("static/uploads/box_111.jpg")
                 text = text.replace('\n', '')
                 gmt = time.gmtime()
                 counts = 0
-                print("count", int(text.find(model)))
-                if int(text.find(model)) >=-1:
-                    jsonArray = json.loads(str(validation))
+                print("count", int(text.find('1')))
+                valid = 0
+                for key, value in models.items():
+                    print(key.replace('"', ""), '->', value)
+                    print('Available->', text.find(key.replace('"', "")))
+                    
+                if int(text.find('1')) >=-1:
                     jsonArray =json.loads(jsonArray)
                     print("counter", jsonArray)
                     counts = int(jsonArray["dcCount"])
@@ -71,7 +76,7 @@ class VideoCamera(object):
                     #if counts > 0 and counts != len(barcodes):
                     if counts == 0:
                         HoldStatus(user).writeFile("1", "_scan")
-                        # pattern = '^a...s$'   
+                        # pattern = '^a...s$'
                         # test_string = 'abyss'
                         # result = re.match(pattern, test_string)
                     else:

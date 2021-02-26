@@ -14,13 +14,14 @@
           </select>
         </div>
       </div>
-      <div class="form-group">
+      <!-- <div class="form-group">
         <label for="company">Model</label>
         <div>
           <select id="model" name="model" class="form-control">
             <option>SELECT</option>
           </select>
         </div>
+        </div> -->
       </div> <div class="form-group">
         <div class="demo">
           <ul id="sortable1" class="connectedSortable">
@@ -94,45 +95,42 @@
         contentType: "application/json",
         dataType: "json",
         success: function (response) {
-        
+          var m = {};
           $.each(response["results"], function (key, value) {
-            $("#model").append(
-              $("<option>", {
-                value: value["1"],
-                text: value["2"],
-                "data-mark": value["1"],
-              })
-            );
+            m['"'+value["1"]+'"'] = JSON.parse(value["2"]);
           });
+          localStorage.setItem("validation",JSON.stringify(m));
+          $("#validation").val(JSON.stringify(m));
+          console.log(m);
           $("#overlay").fadeOut();
         },
       });
     });
 
-    $("select#model").change(function () {
-      var modelId = $(this).find("option:selected").val();
-      $("#overlay").fadeIn();
-      $.ajax({
-        type: "GET",
-        url: "api/model/" + modelId,
-        data: {},
-        contentType: "application/json",
-        dataType: "json",
-        success: function (response) {
-          var l = jQuery.parseJSON(response);
+    // $("select#model").change(function () {
+    //   var modelId = $(this).find("option:selected").val();
+    //   $("#overlay").fadeIn();
+    //   $.ajax({
+    //     type: "GET",
+    //     url: "api/model/" + modelId,
+    //     data: {},
+    //     contentType: "application/json",
+    //     dataType: "json",
+    //     success: function (response) {
+    //       var l = jQuery.parseJSON(response);
           
-          var lo = 0;
-          l["data"].forEach(function(entry) {
-            l["data"][lo]["sort"] = lo;
-            $("#sortable1").append('<li id="'+lo+'" class="column ">'+l["data"][lo]['label']+'</li>');
-            lo++;
-          });
-          localStorage.setItem("validation",JSON.stringify(l));
-          $("#validation").val(JSON.stringify(l));
-          $("#overlay").fadeOut();
-        },
-      });
-    });
+    //       var lo = 0;
+    //       l["data"].forEach(function(entry) {
+    //         l["data"][lo]["sort"] = lo;
+    //         $("#sortable1").append('<li id="'+lo+'" class="column ">'+l["data"][lo]['label']+'</li>');
+    //         lo++;
+    //       });
+    //       localStorage.setItem("validation",JSON.stringify(l));
+    //       $("#validation").val(JSON.stringify(l));
+    //       $("#overlay").fadeOut();
+    //     },
+    //   });
+    // });
   });
 </script>
 {% endblock %}

@@ -30,7 +30,7 @@ class Connection:
 
     def getModels(self, customer_id):
         self.cur.execute(
-            "SELECT m.Name,m.Name FROM CustomerModels  cm LEFT JOIN Automation.Models m ON cm.ModelId = m.Id Where cm.CustomerId =%d" % int(customer_id))
+            "SELECT m.Name,m.Validation FROM CustomerModels  cm LEFT JOIN Automation.Models m ON cm.ModelId = m.Id Where cm.CustomerId =%d" % int(customer_id))
 
         rows = [x for x in self.cur]
         cols = [x[0] for x in self.cur.fetchall()]
