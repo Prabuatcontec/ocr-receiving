@@ -1,13 +1,11 @@
-{% extends "layout.html" %}
-
-{% block content %}
+{% extends "layout.html" %} {% block content %}
 <div id="centerDiv">
   <div class="upload-form">
-    <span id="username" style="display: none;">{{user}}</span>
+    <span id="username" style="display: none">{{user}}</span>
     <form action="/video" method="POST" name="receiving">
       <div class="form-group">
-        <label   for="company">Customer</label>
-        <div >
+        <label for="company">Customer</label>
+        <div>
           <select id="customer" name="customer" class="form-control">
             <option>SELECT</option>
             {% for col in customers %}
@@ -17,18 +15,27 @@
         </div>
       </div>
       <div class="form-group">
-        <label  for="company">Model</label>
-        <div >
+        <label for="company">Model</label>
+        <div>
           <select id="model" name="model" class="form-control">
             <option>SELECT</option>
           </select>
         </div>
+      </div> <div class="form-group">
+        <div class="demo">
+          <ul id="sortable1" class="connectedSortable">
+          </ul>
+        </div>
+
+        <div class="sortable1 list" style="display: none;"></div>
       </div>
+      <textarea name="validation" id="validation" style="display: none;"></textarea>
       <div class="form-group">
-        <div class="col-sm-6 col-md-4">
+        <div >
           <input type="submit" class="btn btn-primary" />
         </div>
-    </form>
+      </div>
+     
     </form>
   </div>
 </div>
@@ -38,28 +45,92 @@
       window.location = "/";
     }
   }, 3000);
-  localStorage.setItem("username", document.getElementById("username").innerHTML);
+  localStorage.setItem(
+    "username",
+    document.getElementById("username").innerHTML
+  );
+
   $(document).ready(function () {
+    localStorage.removeItem("validation");
+    $("#sortable1").sortable({
+      connectWith: ".connectedSortable",
+      stop: function (event, ui) {
+        var s = 0;
+        $(".connectedSortable").each(function () {
+          result = "";
+
+          var valNew = $(this).sortable("toArray"); 
+          console.log(valNew);
+          var l = jQuery.parseJSON(localStorage.getItem("validation"));
+          var m = l['data'];
+          for(var i=0;i<valNew.length;i++){
+            m[valNew[i]]['sort'] = i;
+          }
+          l['data']=m;
+
+          localStorage.setItem("validation",JSON.stringify(l));
+
+          $("#validation").val(JSON.stringify(l));
+          $(this)
+            .find("li")
+            .each(function () {
+              result += $(this).text() + ",";
+            });
+          $("." + $(this).attr("id") + ".list").html(result);
+        });
+      },
+    });
+
+    $(".upload-form").removeClass("off-canvas");
     $("select#customer").change(function () {
+      
+      var customerId = $(this).find("option:selected").val();
       $('#model').find('option:not(:first)').remove();
-      var customerId = $(this).find('option:selected').val();
-      $('#overlay').fadeIn()
+      $("#overlay").fadeIn();
       $.ajax({
-        type: 'GET',
+        type: "GET",
         url: "api/customer/models/" + customerId,
         data: {},
-        contentType: 'application/json',
-        dataType: 'json',
+        contentType: "application/json",
+        dataType: "json",
         success: function (response) {
-          $.each(response['results'], function (key, value) {
-            $("#model").append($('<option>', {
-              value: value['1'],
-              text: value['2'],
-              'data-mark': value['1']
-            }));
+        
+          $.each(response["results"], function (key, value) {
+            $("#model").append(
+              $("<option>", {
+                value: value["1"],
+                text: value["2"],
+                "data-mark": value["1"],
+              })
+            );
           });
-          $('#overlay').fadeOut()
-        }
+          $("#overlay").fadeOut();
+        },
+      });
+    });
+
+    $("select#model").change(function () {
+      var modelId = $(this).find("option:selected").val();
+      $("#overlay").fadeIn();
+      $.ajax({
+        type: "GET",
+        url: "api/model/" + modelId,
+        data: {},
+        contentType: "application/json",
+        dataType: "json",
+        success: function (response) {
+          var l = jQuery.parseJSON(response);
+          
+          var lo = 0;
+          l["data"].forEach(function(entry) {
+            l["data"][lo]["sort"] = lo;
+            $("#sortable1").append('<li id="'+lo+'" class="column ">'+l["data"][lo]['label']+'</li>');
+            lo++;
+          });
+          localStorage.setItem("validation",JSON.stringify(l));
+          $("#validation").val(JSON.stringify(l));
+          $("#overlay").fadeOut();
+        },
       });
     });
   });

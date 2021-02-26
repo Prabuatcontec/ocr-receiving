@@ -51,10 +51,13 @@ function tl_status {
     if diff <(git rev-parse HEAD | cut -b 1-30) <(eval "$y" | cut -b 1-30); then
     echo Not
     else
+    file="static/uploads/0_update.txt"
+    update=$(cat "$file")
+    if update == 1
     git pull
     docker pull prabuatcontec/ocr-receiving
     docker-compose -f docker-compose.yml up --build
-
+    fi
     fi
 }
 
@@ -68,6 +71,14 @@ function tl_build {
 
 function tl_up {
 	sudo docker-compose -f docker-compose.yml up --build
+}
+
+function tl_read {
+  file="static/uploads/0_update.txt" #the file where you keep your string name
+
+  name=$(cat "$file")        #the output of 'cat $file' is assigned to the $name variable
+
+  echo $name 
 }
 
 # set action
@@ -94,6 +105,12 @@ case $TL_ACTION in
   init)
 
     tl_init $@
+
+    ;;
+
+  read)
+
+    tl_read $@
 
     ;;
 

@@ -50,19 +50,20 @@ class App:
             "user").innerHTML).readFile("_serial")
         self.js.document.getElementById("dc_").innerHTML = r
 
+#background process happening without any refreshing
+@app.route('/background_process_enable/<string:val>')
+def background_process_enable(val):
+    HoldStatus("0").writeFile(val,"_update")    
+    return ('{"nothing":1}')
 
-@app.route('/video_feed/<string:model>/<string:user>')
-def video_feed(model, user):
-    return Response(gen(VideoCamera(), model, user),
+
+@app.route('/video_feed/<string:model>/<string:user>/<string:validation>')
+def video_feed(model, user, validation):
+    return Response(gen(VideoCamera(), model, user, validation),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-def gen(camera, model, user):
-    response = requests.get(
-        Config.API_URL + 'model/'+model,
-        headers={'Content-Type': 'application/json'}
-    )
-    validation = response.json()
+def gen(camera, model, user, validation):
     while True:
         frame = camera.get_frame(model, validation, user)
 
@@ -75,7 +76,7 @@ def ocr():
     if request.method == 'POST':
         HoldStatus(session['user']).writeFile("-", "_serial")
         HoldStatus(session['user']).writeFile("0", "_scan")
-        return App.render(render_template("ocr.html", model=request.form['model'], user=session['user']))
+        return App.render(render_template("ocr.html", model=request.form['model'], user=session['user'], validation=json.dumps(request.form['validation'])))
 
 
 if __name__ == '__main__':

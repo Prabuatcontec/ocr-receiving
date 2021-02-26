@@ -32,7 +32,13 @@ def receiving():
         headers={'Content-Type': 'application/json'}
     )
     a = response.json()
-
+    HoldStatus("0").writeFile("0", "_update")
     return render_template("receiving.html", customers=a['results'], user=session['user'])
   if request.method == 'GET':
-    return render_template("index.html", error="")
+    response = requests.get(
+        Config.API_URL + 'customers',
+        headers={'Content-Type': 'application/json'}
+    )
+    a = response.json()
+    HoldStatus("0").writeFile("0", "_update")
+    return render_template("receiving.html",customers=a['results'], user=session['user'])
