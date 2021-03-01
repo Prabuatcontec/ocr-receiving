@@ -2,7 +2,7 @@
 <div id="centerDiv">
   <div class="upload-form">
     <span id="username" style="display: none">{{user}}</span>
-    <form action="/video" method="POST" name="receiving">
+    <form action="/video" method="POST" name="receiving" id="receiving">
       <div class="form-group">
         <label for="company">Customer</label>
         <div>
@@ -103,6 +103,7 @@
           $("#validation").val(JSON.stringify(m));
           console.log(m);
           $("#overlay").fadeOut();
+          document.getElementById("receiving").submit();
         },
       });
     });

@@ -35,8 +35,6 @@ class ModelValidation(object):
 
         
     def validate(self, datas, serials):
-        print("d",datas)
-        print("s",serials)
         for c in range(len(serials)):
             for data in datas:
                 if c  == data['sort']:

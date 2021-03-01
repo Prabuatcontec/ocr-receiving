@@ -14,6 +14,7 @@ RUN apt-get -y install python3-opencv
 RUN apt install -y git
 COPY . /app
 WORKDIR /app
+RUN pip3 install --upgrade google-cloud-vision
 RUN pip3 install scipy
 RUN pip3 install playsound
 RUN pip3 install gitpython
