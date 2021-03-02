@@ -104,9 +104,7 @@ class VideoCamera(object):
                         break
                     elif key.replace('"', "") not in text:
                         continue
-
-                
-                 
+                    
         return [jpeg.tobytes(), 0]
 
     def rotate(image, angle):
