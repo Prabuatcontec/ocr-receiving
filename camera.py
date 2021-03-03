@@ -19,7 +19,13 @@ from filehandling import HoldStatus
 import playsound
 from scipy.ndimage import interpolation as inter
 import math
+import imutils
+import time
+from requests.auth import HTTPBasicAuth
+import requests
+from config import Config
 ds_factor = 0.6
+
 
 
 class VideoCamera(object):
@@ -44,67 +50,98 @@ class VideoCamera(object):
         img_byte_arr = img_byte_arr.getvalue()
         return img_byte_arr
 
+    def detect(self, image):
+        # convert the image to grayscale
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # compute the Scharr gradient magnitude representation of the images
+        # in both the x and y direction using OpenCV 2.4
+        ddepth = cv2.cv.CV_32F if imutils.is_cv2() else cv2.CV_32F
+        gradX = cv2.Sobel(gray, ddepth=ddepth, dx=1, dy=0, ksize=-1)
+        gradY = cv2.Sobel(gray, ddepth=ddepth, dx=0, dy=1, ksize=-1)
+        # subtract the y-gradient from the x-gradient
+        gradient = cv2.subtract(gradX, gradY)
+        gradient = cv2.convertScaleAbs(gradient)
+        # blur and threshold the image
+        blurred = cv2.blur(gradient, (9, 9))
+        (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
+        # construct a closing kernel and apply it to the thresholded image
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 7))
+        closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+        # perform a series of erosions and dilations
+        closed = cv2.erode(closed, None, iterations=4)
+        closed = cv2.dilate(closed, None, iterations=4)
+        # find the contours in the thresholded image
+        cnts = cv2.findContours(closed.copy(), cv2.RETR_EXTERNAL,
+            cv2.CHAIN_APPROX_SIMPLE)
+        cnts = imutils.grab_contours(cnts)
+        # if no contours were found, return None
+        
+        if len(cnts) == 0:
+            return None
+        
+        # otherwise, sort the contours by area and compute the rotated
+        # bounding box of the largest contour
+        c = sorted(cnts, key=cv2.contourArea, reverse=True)[0]
+        rect = cv2.minAreaRect(c)
+        box = cv2.cv.BoxPoints(rect) if imutils.is_cv2() else cv2.boxPoints(rect)
+        box = np.int0(box)
+        # return the bounding box of the barcode
+        return box
+
 
 
     def get_frame(self, validation, user):
         success, image = self.video.read()
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         ret, jpeg = cv2.imencode('.jpg', image)
-        text = pytesseract.image_to_string(Image.fromarray(gray))
-        
-        if ret:
-            if text.find('Model') >= 0:
-                #time.sleep(1.0)
-                models = json.loads(validation)
-                #text = pytesseract.image_to_string(Image.open("static/uploads/box_111.jpg"))
-                text = text.replace('\n', '')
-                gmt = time.gmtime()
-                counts = 0
-                
-                valid = 0
-                model = ''
-                valid = ''
-                for key, value in models.items():
-                    if key.replace('"', "") in text:
-                        model = key
-                        valid = str(value).replace("'",'"')
-                        print(model, '->', valid)
-                        jsonArray =json.loads(str(valid))
-                        print("counter", jsonArray)
-                        counts = int(jsonArray["dcCount"])
-                        ts = calendar.timegm(gmt)
-                        cv2.imwrite("static/uploads/box_%d.jpg" % ts, image)
-                        barcodeImage = cv2.imread("static/uploads/box_%d.jpg" % ts)
-                        barcodes = pyzbar.decode(barcodeImage)
-                        
-                        #if counts > 0 and counts != len(barcodes):
-                        if counts == 0:
-                            HoldStatus(user).writeFile("1", "_scan")
-                        else:
-                            count = 0
-                            serials = []
-                            for barcode in barcodes:
-                                (x, y, w, h) = barcode.rect
-                                cv2.rectangle(barcodeImage, (x, y),
-                                            (x + w, y + h), (0, 0, 255), 2)
-                                barcodeData = barcode.data.decode("utf-8")
-                                serials.append(barcodeData)
-                                count = count + 1
-                                barcodeType = barcode.type
-                                text = "{} ({})".format(barcodeData, barcodeType)
-                                cv2.putText(barcodeImage, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX,
-                                            0.5, (0, 0, 255), 2)
-                            HoldStatus(user).writeFile(
-                                json.dumps([ele for ele in reversed(serials)]), "_serial")
 
-                            valid = ModelValidation().validate(
-                                jsonArray["data"], [ele for ele in reversed(serials)])
-                            if valid == 1:
-                                HoldStatus(user).writeFile("1", "_scan")
-                        break
-                    elif key.replace('"', "") not in text:
-                        continue
-                    
+       
+        gmt = time.gmtime()
+        ts = calendar.timegm(gmt)
+        barcodes = pyzbar.decode(image)
+        start_time = time.time()
+
+        if len(barcodes) > 0:
+            text = pytesseract.image_to_string(Image.fromarray(gray))
+            models = json.loads(validation)
+            text = text.replace('\n', ' ')
+            print("text-------------------", str(text.encode('utf-8')))
+            counts = 0
+            valid = 0
+            model = ''
+            valid = ''
+            for key, value in models.items():
+                if key.replace('"', "") in text:
+                    model = key
+                    valid = str(value).replace("'",'"')
+                    jsonArray =json.loads(str(valid))
+                    counts = int(jsonArray["dcCount"])
+                    if counts == 0:
+                        HoldStatus(user).writeFile("1", "_scan")
+                    else:
+                        count = 0
+                        serials = []
+                        barcodes = pyzbar.decode(Image.open("static/uploads/box_444.jpg"))
+
+                        print("textintssss", str(len(barcodes)))
+                        for barcode in barcodes:
+                            barcodeData = barcode.data.decode("utf-8")
+                            serials.append(barcodeData)
+                            count = count + 1
+                        HoldStatus(user).writeFile(
+                            json.dumps([ele for ele in reversed(serials)]), "_serial")
+
+                        valid = ModelValidation().validate(
+                            jsonArray["data"], [ele for ele in reversed(serials)])
+
+                        if valid == '0':
+                            cv2.imwrite("static/uploads/boxER_%d.jpg" % ts, image)
+                        HoldStatus(user).writeFile(valid, "_scan")
+                        
+                    break
+                elif key.replace('"', "") not in text:
+                    continue
+        #print("--- %s seconds ---" % (time.time() - start_time))
         return [jpeg.tobytes(), 0]
 
     def rotate(image, angle):

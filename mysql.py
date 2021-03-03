@@ -30,7 +30,7 @@ class Connection:
 
     def getModels(self, customer_id):
         self.cur.execute(
-            "SELECT m.Name,m.Validation FROM CustomerModels  cm LEFT JOIN Automation.Models m ON cm.ModelId = m.Id Where cm.CustomerId =%d" % int(customer_id))
+            "SELECT m.Name,m.Validation FROM Automation.CustomerModels  cm LEFT JOIN Automation.Models m ON cm.ModelId = m.Id Where cm.CustomerId =%d" % int(customer_id))
 
         rows = [x for x in self.cur]
         cols = [x[0] for x in self.cur.fetchall()]
@@ -45,8 +45,11 @@ class Connection:
             models.append(model)
         return models
 
-    def getModel(self, model_id):
-        self.cur.execute(
-            "SELECT Validation FROM Models Where Name ='%s'" % str(model_id))
-        cols = self.cur.fetchone()
-        return cols[0]
+    def insertModel(self, model, serial):
+        mycursor = self.cur
+
+        sql = "INSERT INTO Automation.ScannedSerials (Serials, model) VALUES (%s, %s)"
+        val = (serial, model)
+        self.cur.execute(sql, val)
+ 
+        return 1
