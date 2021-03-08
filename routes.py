@@ -33,6 +33,7 @@ def receiving():
     )
     a = response.json()
     HoldStatus("0").writeFile("0", "_update")
+    HoldStatus(session['user']).writeFile("","_validation")
     return render_template("receiving.html", customers=a['results'], user=session['user'])
   if request.method == 'GET':
     response = requests.get(
@@ -41,4 +42,5 @@ def receiving():
     )
     a = response.json()
     HoldStatus("0").writeFile("0", "_update")
+    HoldStatus(session['user']).writeFile("","_validation")
     return render_template("receiving.html",customers=a['results'], user=session['user'])

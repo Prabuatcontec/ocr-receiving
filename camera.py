@@ -90,11 +90,10 @@ class VideoCamera(object):
 
 
 
-    def get_frame(self, validation, user):
+    def get_frame(self, user):
         success, image = self.video.read()
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         ret, jpeg = cv2.imencode('.jpg', image)
-
        
         gmt = time.gmtime()
         ts = calendar.timegm(gmt)
@@ -103,9 +102,12 @@ class VideoCamera(object):
 
         if len(barcodes) > 0:
             text = pytesseract.image_to_string(Image.fromarray(gray))
-            models = json.loads(validation)
+            validation = HoldStatus(user).readFile("_validation")
+            strVal = str(validation)
+            print("text-------------------", strVal)
+            models = json.loads(strVal)
             text = text.replace('\n', ' ')
-            print("text-------------------", str(text.encode('utf-8')))
+            
             counts = 0
             valid = 0
             model = ''
@@ -115,28 +117,24 @@ class VideoCamera(object):
                     model = key
                     valid = str(value).replace("'",'"')
                     jsonArray =json.loads(str(valid))
-                    counts = int(jsonArray["dcCount"])
-                    if counts == 0:
-                        HoldStatus(user).writeFile("1", "_scan")
-                    else:
-                        count = 0
-                        serials = []
-                        barcodes = pyzbar.decode(Image.open("static/uploads/box_444.jpg"))
+                    count = 0
+                    serials = []
+                    barcodes = pyzbar.decode(Image.open("static/uploads/box_123.jpg"))
 
-                        print("textintssss", str(len(barcodes)))
-                        for barcode in barcodes:
-                            barcodeData = barcode.data.decode("utf-8")
-                            serials.append(barcodeData)
-                            count = count + 1
-                        HoldStatus(user).writeFile(
-                            json.dumps([ele for ele in reversed(serials)]), "_serial")
+                    print("textintssss", str(len(barcodes)))
+                    for barcode in barcodes:
+                        barcodeData = barcode.data.decode("utf-8")
+                        serials.append(barcodeData)
+                        count = count + 1
+                    HoldStatus(user).writeFile(
+                        json.dumps([ele for ele in reversed(serials)]), "_serial")
 
-                        valid = ModelValidation().validate(
-                            jsonArray["data"], [ele for ele in reversed(serials)])
+                    valid = ModelValidation().validate(
+                        jsonArray["data"], [ele for ele in reversed(serials)])
 
-                        if valid == '0':
-                            cv2.imwrite("static/uploads/boxER_%d.jpg" % ts, image)
-                        HoldStatus(user).writeFile(valid, "_scan")
+                    if valid == '0':
+                        cv2.imwrite("static/uploads/boxER_%d.jpg" % ts, image)
+                    HoldStatus(user).writeFile(valid, "_scan")
                         
                     break
                 elif key.replace('"', "") not in text:

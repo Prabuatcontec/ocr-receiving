@@ -14,7 +14,7 @@ def model(m_id):
     return jsonify(Connection().getModel(m_id)), 200
 
 @api_blueprint.route('/serial/<m_id>/<s>')
-def serials(m_id,s):
+def serial(m_id,s):
     return jsonify(Connection().insertModel(m_id, s)), 200
 
 @api_blueprint.route('/customer/models/<customer_id>')

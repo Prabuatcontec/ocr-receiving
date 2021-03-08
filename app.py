@@ -57,15 +57,15 @@ def background_process_enable(val):
     return ('{"nothing":1}')
 
 
-@app.route('/video_feed/<string:validation>/<string:user>')
-def video_feed(validation, user):
-    return Response(gen(VideoCamera(), validation, user),
+@app.route('/video_feed/<string:user>')
+def video_feed(user):
+    return Response(gen(VideoCamera(), user),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-def gen(camera, validation, user):
+def gen(camera, user):
     while True:
-        frame = camera.get_frame(validation, user)
+        frame = camera.get_frame(user)
 
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame[0] + b'\r\n\r\n')
@@ -76,7 +76,13 @@ def ocr():
     if request.method == 'POST':
         HoldStatus(session['user']).writeFile("-", "_serial")
         HoldStatus(session['user']).writeFile("0", "_scan")
-        return App.render(render_template("ocr.html", customer=request.form['customer'], validation=request.form['validation'], user=session['user'] ))
+        dict = {}
+        
+        for value in Connection().getModels(request.form['customer']):
+            mdict1 = {value[1]:value[2]}  
+            dict.update(mdict1) 
+        HoldStatus(session['user']).writeFile(json.dumps(dict),"_validation")
+        return App.render(render_template("ocr.html", user=session['user'] ))
 
 
 if __name__ == '__main__':

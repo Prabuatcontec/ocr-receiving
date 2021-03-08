@@ -84,28 +84,29 @@
 
     $(".upload-form").removeClass("off-canvas");
     $("select#customer").change(function () {
-      
-      var customerId = $(this).find("option:selected").val();
-      $('#model').find('option:not(:first)').remove();
       $("#overlay").fadeIn();
-      $.ajax({
-        type: "GET",
-        url: "api/customer/models/" + customerId,
-        data: {},
-        contentType: "application/json",
-        dataType: "json",
-        success: function (response) {
-          var m = {};
-          $.each(response["results"], function (key, value) {
-            m['"'+value["1"]+'"'] = JSON.parse(value["2"]);
-          });
-          localStorage.setItem("validation",JSON.stringify(m));
-          $("#validation").val(JSON.stringify(m));
-          console.log(m);
-          $("#overlay").fadeOut();
-          document.getElementById("receiving").submit();
-        },
-      });
+      document.getElementById("receiving").submit();
+      // var customerId = $(this).find("option:selected").val();
+      // $('#model').find('option:not(:first)').remove();
+      // $("#overlay").fadeIn();
+      // $.ajax({
+      //   type: "GET",
+      //   url: "api/customer/models/" + customerId,
+      //   data: {},
+      //   contentType: "application/json",
+      //   dataType: "json",
+      //   success: function (response) {
+      //     var m = {};
+      //     $.each(response["results"], function (key, value) {
+      //       m['"'+value["1"]+'"'] = JSON.parse(value["2"]);
+      //     });
+      //     localStorage.setItem("validation",JSON.stringify(m));
+      //     $("#validation").val(JSON.stringify(m));
+      //     console.log(m);
+      //     $("#overlay").fadeOut();
+      //     document.getElementById("receiving").submit();
+      //   },
+      // });
     });
 
     // $("select#model").change(function () {
