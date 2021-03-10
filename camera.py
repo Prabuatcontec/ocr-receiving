@@ -23,10 +23,11 @@ import imutils
 import time
 from requests.auth import HTTPBasicAuth
 import requests
+from cachetools import cached, TTLCache
 from config import Config
 ds_factor = 0.6
 
-
+cache = TTLCache(maxsize=100, ttl=10)
 
 class VideoCamera(object):
     def __init__(self):
@@ -37,6 +38,11 @@ class VideoCamera(object):
 
     def delCam(self):
         self.video.release()
+
+    @cached(cache)
+    def read_data(self, user):
+        data = open("static/uploads/"+user+"_validation.txt", 'r').read()
+        return data
     
     def Reverse(lst): 
         return [ele for ele in reversed(lst)] 
@@ -102,9 +108,8 @@ class VideoCamera(object):
 
         if len(barcodes) > 0:
             text = pytesseract.image_to_string(Image.fromarray(gray))
-            validation = HoldStatus(user).readFile("_validation")
+            validation = self.read_data(user)
             strVal = str(validation)
-            print("text-------------------", strVal)
             models = json.loads(strVal)
             text = text.replace('\n', ' ')
             
@@ -119,9 +124,8 @@ class VideoCamera(object):
                     jsonArray =json.loads(str(valid))
                     count = 0
                     serials = []
-                    barcodes = pyzbar.decode(Image.open("static/uploads/box_123.jpg"))
+                    
 
-                    print("textintssss", str(len(barcodes)))
                     for barcode in barcodes:
                         barcodeData = barcode.data.decode("utf-8")
                         serials.append(barcodeData)

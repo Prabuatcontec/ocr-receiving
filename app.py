@@ -84,6 +84,11 @@ def ocr():
         HoldStatus(session['user']).writeFile(json.dumps(dict),"_validation")
         return App.render(render_template("ocr.html", user=session['user'] ))
 
+@app.route("/logout", methods=['GET'])
+def logout():
+    session.clear()
+    return App.render(render_template("index.html", error=""))
+
 
 if __name__ == '__main__':
     app.secret_key = 'A0Zr98j/3yX R~XHHER!jmN]LWX/,?RT'
