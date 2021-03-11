@@ -35,6 +35,8 @@ class ModelValidation(object):
 
         
     def validate(self, datas, serials):
+        if(len(datas) != len(serials)):
+            return '1'
         for c in range(len(serials)):
             for data in datas:
                 if str(c)  == data['sort']:

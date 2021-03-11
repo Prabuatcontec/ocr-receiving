@@ -25,6 +25,7 @@ from requests.auth import HTTPBasicAuth
 import requests
 from cachetools import cached, TTLCache
 from config import Config
+import random
 ds_factor = 0.6
 
 cache = TTLCache(maxsize=100, ttl=10)
@@ -143,7 +144,50 @@ class VideoCamera(object):
                     break
                 elif key.replace('"', "") not in text:
                     continue
-        #print("--- %s seconds ---" % (time.time() - start_time))
+        # print("--- %s seconds ---" % (time.time() - start_time))
+        return [jpeg.tobytes(), 0]
+
+    def get_Singleframe(self, user):
+        success, image = self.video.read()
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        ret, jpeg = cv2.imencode('.jpg', image)
+       
+        gmt = time.gmtime()
+        ts = calendar.timegm(gmt)
+        barcodes = pyzbar.decode(image)
+        start_time = time.time()
+
+        if len(barcodes) > 0:
+            fillenameImage = str(str(ts)+'-'+str(random.randint(0,99999)))
+            
+            serials = []
+                    
+            for barcode in barcodes:
+                barcodeData = barcode.data.decode("utf-8")
+                serials.append(barcodeData)
+            validation = data = open("static/uploads/"+user+"_validation.txt", 'r').read()
+            strVal = str(validation)
+            models = json.loads(strVal)
+            model = 'DMS2004UHD'
+            valid = '1'
+            for key, value in models.items():
+                if key.replace('"', "") == model:
+                    valid = str(value).replace("'",'"')
+                    jsonArray =json.loads(str(valid))
+                    break
+                else:
+                    continue
+            
+            valid = ModelValidation().validate(
+                                jsonArray["data"], [ele for ele in reversed(serials)])
+            
+            
+            if valid == '0':
+                serials.append(fillenameImage)
+                cv2.imwrite("static/uploads/boxER_%s.jpg" % fillenameImage, image)
+                file1 = open("static/uploads/rsenthil_serial.txt", "a")  
+                file1.write("\n")
+                file1.write(json.dumps([ele for ele in reversed(serials)]))
         return [jpeg.tobytes(), 0]
 
     def rotate(image, angle):

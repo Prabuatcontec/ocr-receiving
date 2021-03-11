@@ -5,10 +5,11 @@ from requests.auth import HTTPBasicAuth
 import os
 import sys
 import pytesseract
-import threading
 import argparse
 import cv2
 import re
+import time
+import calendar
 from PIL import Image, ImageTk
 from camera import VideoCamera
 import requests
@@ -19,6 +20,7 @@ from mysql import Connection
 from selenium import webdriver
 from config import Config
 from filehandling import HoldStatus
+from threading import Thread
 __author__ = 'Prabu <mprabu@gocontec.com>'
 __source__ = ''
 
@@ -27,7 +29,8 @@ app = Flask(__name__)
 app.register_blueprint(api_blueprint, url_prefix='/api')
 app.register_blueprint(routes_blueprint, url_prefix='/')
 
-
+# global camera
+# camera = VideoCamera()
 @jsf.use(app)
 class App:
     def __init__(self):
@@ -59,25 +62,26 @@ def background_process_enable(val):
 
 @app.route('/video_feed/<string:user>')
 def video_feed(user):
-    return Response(gen(VideoCamera(), user),
+    return Response(gen( VideoCamera(), user),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 def gen(camera, user):
     while True:
         frame = camera.get_frame(user)
-
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame[0] + b'\r\n\r\n')
 
 
 @app.route("/video", methods=['POST'])
 def ocr():
+    # del camera
+    # camera = VideoCamera()
     if request.method == 'POST':
         HoldStatus(session['user']).writeFile("-", "_serial")
         HoldStatus(session['user']).writeFile("0", "_scan")
         dict = {}
-        
+        # run_func()
         for value in Connection().getModels(request.form['customer']):
             mdict1 = {value[1]:value[2]}  
             dict.update(mdict1) 
