@@ -42,7 +42,7 @@ class VideoCamera(object):
 
     @cached(cache)
     def read_data(self, user):
-        data = open("static/uploads/"+user+"_validation.txt", 'r').read()
+        data = open("static/uploads/_validation.txt", 'r').read()
         return data
     
     def Reverse(lst): 
@@ -165,29 +165,29 @@ class VideoCamera(object):
             for barcode in barcodes:
                 barcodeData = barcode.data.decode("utf-8")
                 serials.append(barcodeData)
-            validation = data = open("static/uploads/"+user+"_validation.txt", 'r').read()
-            strVal = str(validation)
-            models = json.loads(strVal)
-            model = 'DMS2004UHD'
-            valid = '1'
-            for key, value in models.items():
-                if key.replace('"', "") == model:
-                    valid = str(value).replace("'",'"')
-                    jsonArray =json.loads(str(valid))
-                    break
-                else:
-                    continue
+            # validation = data = open("static/uploads/_validation.txt", 'r').read()
+            # strVal = str(validation)
+            # models = json.loads(strVal)
+            # model = 'DMS2004UHD'
+            # valid = '1'
+            # for key, value in models.items():
+            #     if key.replace('"', "") == model:
+            #         valid = str(value).replace("'",'"')
+            #         jsonArray =json.loads(str(valid))
+            #         break
+            #     else:
+            #         continue
             
-            valid = ModelValidation().validate(
-                                jsonArray["data"], [ele for ele in reversed(serials)])
+            # valid = ModelValidation().validate(
+            #                     jsonArray["data"], [ele for ele in reversed(serials)])
             
             
-            if valid == '0':
-                serials.append(fillenameImage)
-                cv2.imwrite("static/uploads/boxER_%s.jpg" % fillenameImage, image)
-                file1 = open("static/uploads/rsenthil_serial.txt", "a")  
-                file1.write("\n")
-                file1.write(json.dumps([ele for ele in reversed(serials)]))
+            # if valid == '0':
+            serials.append(fillenameImage)
+            cv2.imwrite("static/uploads/boxER_%s.jpg" % fillenameImage, image)
+            file1 = open("static/uploads/rsenthil_serial.txt", "a")  
+            file1.write("\n")
+            file1.write(json.dumps([ele for ele in reversed(serials)]))
         return [jpeg.tobytes(), 0]
 
     def rotate(image, angle):
