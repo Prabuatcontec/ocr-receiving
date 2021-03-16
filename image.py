@@ -19,11 +19,9 @@ from filehandling import HoldStatus
 import playsound
 from scipy.ndimage import interpolation as inter
 import math
-import imutils
 import time
 from requests.auth import HTTPBasicAuth
 import requests
-from cachetools import cached, TTLCache
 from config import Config
 import random
 import os.path
@@ -32,9 +30,9 @@ ds_factor = 0.6
 os.environ['OMP_THREAD_LIMIT'] = '1'
 class ImageProcess(object):
     def readData(self):
-        with open("static/uploads/rsenthil_serial.txt", 'r') as t:
+        with open("static/uploads/_serial.txt", 'r') as t:
             for i,line in enumerate(t):
-                    if(int(HoldStatus("").readFile("_serialrowcount")) <= i):
+                    if(int(HoldStatus("").readFile("_serialrowcount")) < i):
                         HoldStatus("").writeFile(str(i), "_serialrowcount")
                         print('line=',str(i))
                         data = line
@@ -64,12 +62,11 @@ class ImageProcess(object):
                                     valid = ModelValidation().validate(
                                         jsonArray["data"], line)
                                     if valid == '0':
-                                        line.insert(0,model)
-
+                                        line.insert(0,str(model))
                                         print('valid')
                                         file1 = open("static/uploads/_goodData.txt", "a")  
                                         file1.write("\n")
-                                        file1.write(str(line).replace('\n', ""))
+                                        file1.write(str(line))
                                     else:
                                         print('invalid')
                                         
@@ -78,6 +75,5 @@ class ImageProcess(object):
                                 elif key.replace('"', "") not in text:
                                     continue
             
-            print('-------------------')
 
             return 1

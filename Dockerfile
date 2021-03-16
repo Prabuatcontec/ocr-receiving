@@ -14,9 +14,9 @@ RUN apt-get -y install python3-opencv
 RUN apt install -y git
 COPY . /app
 WORKDIR /app
-RUN pip3 install rq
-RUN pip3 install cachetools
-RUN pip3 install imutils
+RUn pip3 install imutils
+RUN python3 -m pip install wheel
+RUN python3 -m pip install pandas
 RUN pip3 install scipy
 RUN pip3 install playsound
 RUN pip3 install gitpython

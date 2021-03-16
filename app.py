@@ -50,8 +50,7 @@ class App:
             self.js.document.getElementById(
                 "off_status").style.display = "none"
 
-        r = HoldStatus(self.js.document.getElementById(
-            "user").innerHTML).readFile("_serial")
+        r = HoldStatus("").readFile("_serial")
         self.js.document.getElementById("dc_").innerHTML = r
 
 #background process happening without any refreshing
@@ -69,7 +68,7 @@ def video_feed(user):
 
 def gen(camera, user):
     while True:
-        frame = camera.get_Singleframe(user)
+        frame = camera.getMotion(user)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame[0] + b'\r\n\r\n')
 
@@ -79,16 +78,16 @@ def ocr():
     # del camera
     # camera = VideoCamera()
     if request.method == 'POST':
-        HoldStatus(session['user']).writeFile("-", "_serial")
+        HoldStatus("").writeFile("-", "_serial")
         HoldStatus(session['user']).writeFile("0", "_scan")
         HoldStatus("").writeFile("0", "_serialrowcount")
         HoldStatus("").writeFile("", "_goodData")
         dict = {}
         # run_func()
-        for value in Connection().getModels(request.form['customer']):
-            mdict1 = {value[1]:value[2]}  
-            dict.update(mdict1) 
-        HoldStatus("").writeFile(json.dumps(dict),"_validation")
+        # for value in Connection().getModels(request.form['customer']):
+        #     mdict1 = {value[1]:value[2]}  
+        #     dict.update(mdict1) 
+        # HoldStatus("").writeFile(json.dumps(dict),"_validation")
         return App.render(render_template("ocr.html", user=session['user'] ))
 
 @app.route("/logout", methods=['GET'])
@@ -109,7 +108,7 @@ if __name__ == '__main__':
     # t1 = threading.Thread(target=onoff, name='t1')
     # t1.start()
 
-    MAINTENANCE_INTERVAL = 1
+    MAINTENANCE_INTERVAL = .1
 
     threading.Thread(target=maintenance, daemon=True).start()
     app.run(host="0.0.0.0", port=5000, debug=True)
