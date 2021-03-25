@@ -22,9 +22,11 @@ from selenium import webdriver
 from config import Config
 from filehandling import HoldStatus
 import threading
+import face_recognition
+import pickle
 __author__ = 'Prabu <mprabu@gocontec.com>'
 __source__ = ''
-
+encodeListKnown = "global"
 app = Flask(__name__)
 
 app.register_blueprint(api_blueprint, url_prefix='/api')
@@ -68,26 +70,24 @@ def video_feed(user):
 
 def gen(camera, user):
     while True:
-        frame = camera.getMotion(user)
+        frame = camera.get_Singleframe(user)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame[0] + b'\r\n\r\n')
 
 
-@app.route("/video", methods=['POST'])
+@app.route("/video", methods=['POST','GET'])
 def ocr():
-    # del camera
-    # camera = VideoCamera()
+   
     if request.method == 'POST':
         HoldStatus("").writeFile("-", "_serial")
         HoldStatus(session['user']).writeFile("0", "_scan")
         HoldStatus("").writeFile("0", "_serialrowcount")
         HoldStatus("").writeFile("", "_goodData")
         dict = {}
-        # run_func()
-        # for value in Connection().getModels(request.form['customer']):
-        #     mdict1 = {value[1]:value[2]}  
-        #     dict.update(mdict1) 
-        # HoldStatus("").writeFile(json.dumps(dict),"_validation")
+        for value in Connection().getModels(request.form['customer']):
+            mdict1 = {value[1]:value[2]}  
+            dict.update(mdict1) 
+        HoldStatus("").writeFile(json.dumps(dict),"_validation")
         return App.render(render_template("ocr.html", user=session['user'] ))
 
 @app.route("/logout", methods=['GET'])

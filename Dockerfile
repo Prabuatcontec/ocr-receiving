@@ -12,9 +12,11 @@ RUN apt-get -y install libmysqlclient-dev
 RUN apt-get -y install gcc
 RUN apt-get -y install python3-opencv
 RUN apt install -y git
+RUN apt install -y cmake
 COPY . /app
 WORKDIR /app
 RUn pip3 install imutils
+RUN pip3 install face_recognition
 RUN python3 -m pip install wheel
 RUN python3 -m pip install pandas
 RUN pip3 install scipy

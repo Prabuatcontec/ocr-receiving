@@ -26,8 +26,12 @@ from config import Config
 import random
 import pandas
 from datetime import datetime 
+import pickle
 ds_factor = 0.6
 path = 'dataset'
+
+
+import face_recognition
 
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read('trainer/trainer.yml')
@@ -215,6 +219,7 @@ class VideoCamera(object):
 
         return faceSamples,ids
 
+
     def getMotion(self, user):
         static_back = None
         motion_list = [ None, None ]
@@ -231,43 +236,69 @@ class VideoCamera(object):
         # recognizer.train(faces, np.array(ids))
         # recognizer.write('trainer/trainer.yml')
         # exit()
-        names = ['Corona', 'Prabu-Hero', 'Uma', "Nantha"] 
-        # Save the model into trainer/trainer.yml
+        names = ['Corona', 'Prabu', 'Prabu'] 
         
+        with open('dataset_faces.dat', 'rb') as f:
+	        encodeListKnown = pickle.load(f)
+
+        with open('class_names.dat', 'rb') as f:
+	        classNames = pickle.load(f)
         while True:
             check, frame = self.video.read()
             motion = 0
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             gray = cv2.GaussianBlur(gray, (21, 21), 0)
+            
+            
+            # imgS = cv2.resize(frame,(0,0), None, 0.25, 0.25)
+            # imgS = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            # facesCurFrame = face_recognition.face_locations(imgS)
+            # encodeCurFrame = face_recognition.face_encodings(imgS, facesCurFrame)
+
+            # for encodeFace,faceLoc in zip(encodeCurFrame, facesCurFrame):
+            #     matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
+            #     faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
+            #     matchIndex = np.argmin(faceDis)
+
+            #     if matches[matchIndex]:
+            #         name =  classNames[matchIndex].upper()
+            #         y1,x2,y2,x1 = faceLoc
+            #         cv2.rectangle(frame, (x1, y1), (x2, y2),(0,255,0), 2)
+            #         cv2.rectangle(frame, (x1, y2-35), (x2, y2),(0,255,0), cv2.FILLED)
+                    #cv2.rectangle(frame, name, (x1+6, y2-6),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,255), 2)
+
             if static_back is None:
                 static_back = gray
                 continue
             #----------------------------------------------
-            # frame = cv2.flip(frame, -1) # Flip vertically
-            gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
 
-            faces = faceCascade.detectMultiScale( 
-                gray,
-                scaleFactor = 1.2,
-                minNeighbors = 5,
-                minSize = (int(minW), int(minH)),
-            )
-            for(x,y,w,h) in faces:
-                cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
-                id, confidence = recognizer.predict(gray[y:y+h,x:x+w])
-                # Check if confidence is less them 100 ==> "0" is perfect match 
-                print('facew--------------------------------------------------------------')
-                if (confidence < 100):
-                    print(str(id))
-                    id = names[id]
-                    confidence = "  {0}%".format(round(100 - confidence))
-                else:
-                    id = "Unknow"
-                    confidence = "  {0}%".format(round(100 - confidence))
+            
+            # frame = cv2.flip(frame, -1) # Flip vertically
+            # gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+
+            # faces = faceCascade.detectMultiScale( 
+            #     gray,
+            #     scaleFactor = 1.2,
+            #     minNeighbors = 5,
+            #     minSize = (int(minW), int(minH)),
+            # )
+            # for(x,y,w,h) in faces:
+            #     #cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
+            #     id, confidence = recognizer.predict(gray[y:y+h,x:x+w])
+            #     # Check if confidence is less them 100 ==> "0" is perfect match 
+            #     print('facew--------------------------------------------------------------')
+            #     if (confidence < 100):
+            #         print(str(id))
+            #         id = names[id]
+            #         confidence = "  {0}%".format(round(100 - confidence))
+            #     else:
+            #         id = "Corana"
+            #         confidence = "  {0}%".format(round(100 - confidence))
                 
-                cv2.putText(frame, str(id), (x+5,y-5), font, 1, (255,255,255), 2)
-                cv2.putText(frame, str(confidence), (x+5,y+h-5), font, 1, (255,255,0), 1)  
-            #----------------------------------------------
+            #     #cv2.putText(frame, str(id), (x+5,y-5), font, 1, (255,255,255), 2)
+            #     #cv2.putText(frame, str(confidence), (x+5,y+h-5), font, 1, (255,255,0), 1)  
+            # #----------------------------------------------
             # img = cv2.flip(frame, -1) # flip video image vertically
             # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             # faces = detector.detectMultiScale(gray, 1.3, 5)
@@ -293,14 +324,20 @@ class VideoCamera(object):
             y = 130
             w = 110 
             h = 160
-            #cv2.rectangle(frame, (x, y), (x + w, y + h), (200, 255, 0), 3) 
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (250, 255, 0), 3) 
+
+            x = 130
+            y = 0
+            w = 110 
+            h = 160
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 3) 
             for contour in cnts: 
                 if cv2.contourArea(contour) < 100: 
                     continue
                 motion = 1
         
                 (x, y, w, h) = cv2.boundingRect(contour) 
-                #cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3) 
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3) 
             ret, jpeg = cv2.imencode('.jpg', frame)
             # Appending status of motion 
             motion_list.append(motion) 
@@ -345,6 +382,8 @@ class VideoCamera(object):
             touched = '0'
             if ( ((x >= 0 and x < 111) or (y < 131 and y > 291))):
                 touched = '1'
+            if ( ((x >= 130 and x < 111) or (y > 0 and y > 291))):
+                touched = '2'
                 
             # Appending time of motion in DataFrame 
             for i in range(0, len(time), 2): 
