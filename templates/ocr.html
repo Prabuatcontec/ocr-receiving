@@ -31,6 +31,7 @@
       </li>
       <li>Dc Status: <span id="dc_"></span></li>
     </ul>
+    <audio id="mySong" src=""></audio>
   </div>
 </div>
 <script type="text/javascript">
@@ -39,7 +40,31 @@
       if ($("#user").html() != "") {
         $("#checkStatus").click();
       }
+
+
     }, 3000);
+
+    $("#element").click(function(){
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/getFileName', true);
+      xhr.send();
+
+      xhr.onreadystatechange = function() {
+        if (this.readyState == 4) {
+        var filePath = this.responseText;
+        var audio = document.getElementById('mySong');
+        audio.src = filePath;
+        audio.load();
+          audio.oncanplaythrough = function() {
+            this.play();
+          }
+        }
+      }
+    });
   });
 </script>
+<script>
+  
+  
+  </script>
 {% endblock %}

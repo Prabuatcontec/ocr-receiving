@@ -52,7 +52,7 @@ class App:
             self.js.document.getElementById(
                 "off_status").style.display = "none"
 
-        r = HoldStatus("").readFile("_serial")
+        r = HoldStatus("").readFile("_goodData")
         self.js.document.getElementById("dc_").innerHTML = r
 
 #background process happening without any refreshing
@@ -74,6 +74,9 @@ def gen(camera, user):
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame[0] + b'\r\n\r\n')
 
+@app.route('/getFileName')
+def getFileName():
+    return 'static/audio/UnitNotFound.mp3'
 
 @app.route("/video", methods=['POST','GET'])
 def ocr():

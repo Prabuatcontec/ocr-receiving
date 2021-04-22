@@ -26,7 +26,7 @@ def receiving():
       return render_template("index.html", error="Authentication Failed!")
     a = response.json()
     session['user'] = a['user']['userName']
-
+    # session['user'] = 'a'
     response = requests.get(
         Config.API_URL + 'customers',
         headers={'Content-Type': 'application/json'}

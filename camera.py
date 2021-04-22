@@ -29,7 +29,10 @@ from datetime import datetime
 import pickle
 ds_factor = 0.6
 path = 'dataset'
-
+image = np.zeros((512,512,3))
+drawing = False
+ix = 0
+iy = 0
 
 import face_recognition
 
@@ -63,11 +66,32 @@ class VideoCamera(object):
         img_byte_arr = img_byte_arr.getvalue()
         return img_byte_arr
 
+    
+    # Adding Function Attached To Mouse Callback
+    def draw(self,event,x,y,flags,params):
+        global ix,iy,drawing
+        # Left Mouse Button Down Pressed
+        if(event==1):
+            drawing = True
+            ix = x
+            iy = y
+        if(event==0):
+            if(drawing==True):
+                #For Drawing Line
+                cv2.line(image,pt1=(ix,iy),pt2=(x,y),color=(255,255,255),thickness=3)
+                ix = x
+                iy = y
+                # For Drawing Rectangle
+                # cv2.rectangle(image,pt1=(ix,iy),pt2=(x,y),color=(255,255,255),thickness=3)
+        if(event==4):
+            drawing = False
+
     def get_frame(self, user):
         success, image = self.video.read()
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        
         ret, jpeg = cv2.imencode('.jpg', image)
-       
+        
         gmt = time.gmtime()
         ts = calendar.timegm(gmt)
         barcodes = pyzbar.decode(image)
