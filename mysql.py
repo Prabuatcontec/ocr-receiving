@@ -28,7 +28,7 @@ class Connection:
             customers.append(customer)
         return customers
 
-    def getModels(self, customer_id):
+    def getModels(self, customer_id, model_id=""):
         self.cur.execute(
             "SELECT m.Name,m.Validation FROM Automation.CustomerModels  cm LEFT JOIN Automation.Models m ON cm.ModelId = m.Id Where cm.CustomerId =%d" % int(customer_id))
 
@@ -42,7 +42,12 @@ class Connection:
             for prop, val in zip(cols, row):
                 v = v+1
                 model[v] = val
-            models.append(model)
+            if(model_id!=""):
+                if(model_id in str(model)):
+                    models.append(model)
+            else:
+                models.append(model)
+
         return models
 
     def insertModel(self, model, serial):

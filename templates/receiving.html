@@ -7,7 +7,7 @@
         <label for="company">Customer</label>
         <div>
           <select id="customer" name="customer" class="form-control">
-            <option>SELECT</option>
+            <option value="">SELECT</option>
             {% for col in customers %}
             <option value="{{ col['1'] }}">{{ col['2'] }}</option>
             {% endfor %}
@@ -15,14 +15,14 @@
           </select>
         </div>
       </div>
-      <!-- <div class="form-group">
+      <div class="form-group">
         <label for="company">Model</label>
         <div>
           <select id="model" name="model" class="form-control">
-            <option>SELECT</option>
+            <option value="">SELECT</option>
           </select>
         </div>
-        </div> -->
+        </div>
       </div> <div class="form-group">
         <div class="demo">
           <ul id="sortable1" class="connectedSortable">
@@ -51,6 +51,7 @@
     "username",
     document.getElementById("username").innerHTML
   );
+  
 
   $(document).ready(function () {
     localStorage.removeItem("validation");
@@ -82,32 +83,39 @@
         });
       },
     });
-
+    $('#receiving').on('submit', function() {
+      var customerId = $(this).find("option:selected").val();
+      if(customerId==""){
+        alert('Select Customer');
+        return false;
+      }
+    })
     $(".upload-form").removeClass("off-canvas");
     $("select#customer").change(function () {
       $("#overlay").fadeIn();
-      document.getElementById("receiving").submit();
-      // var customerId = $(this).find("option:selected").val();
-      // $('#model').find('option:not(:first)').remove();
-      // $("#overlay").fadeIn();
-      // $.ajax({
-      //   type: "GET",
-      //   url: "api/customer/models/" + customerId,
-      //   data: {},
-      //   contentType: "application/json",
-      //   dataType: "json",
-      //   success: function (response) {
-      //     var m = {};
-      //     $.each(response["results"], function (key, value) {
-      //       m['"'+value["1"]+'"'] = JSON.parse(value["2"]);
-      //     });
-      //     localStorage.setItem("validation",JSON.stringify(m));
-      //     $("#validation").val(JSON.stringify(m));
-      //     console.log(m);
-      //     $("#overlay").fadeOut();
-      //     document.getElementById("receiving").submit();
-      //   },
-      // });
+      // document.getElementById("receiving").submit();
+      var customerId = $(this).find("option:selected").val();
+      $('#model').find('option:not(:first)').remove();
+      $("#overlay").fadeIn();
+      $.ajax({
+        type: "GET",
+        url: "api/customer/models/" + customerId,
+        data: {},
+        contentType: "application/json",
+        dataType: "json",
+        success: function (response) {
+          var m = {};
+          $.each(response["results"], function (key, value) {
+            $('#model').append($('<option></option>').val(value["1"]).html(value["1"])); 
+            // m['"'+value["1"]+'"'] = JSON.parse(value["2"]);
+          });
+          //localStorage.setItem("validation",JSON.stringify(m));
+          //$("#validation").val(JSON.stringify(m));
+          console.log(m);
+          $("#overlay").fadeOut();
+          //document.getElementById("receiving").submit();
+        },
+      });
     });
 
     // $("select#model").change(function () {

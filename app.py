@@ -89,9 +89,10 @@ def ocr():
         HoldStatus("").writeFile("", "_goodData")
         HoldStatus("").writeFile("0", "_processing")
         dict = {}
-        for value in Connection().getModels(request.form['customer']):
-            mdict1 = {value[1]:value[2]}
-            dict.update(mdict1)
+        
+        for value in Connection().getModels(request.form['customer'], request.form['model']):
+           mdict1 = {value[1]:value[2]}
+           dict.update(mdict1)
         HoldStatus("").writeFile(json.dumps(dict),"_validation")
         return App.render(render_template("ocr.html", user=session['user'] ))
 
