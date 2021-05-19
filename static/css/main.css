@@ -193,6 +193,17 @@ input:focus {
   font-weight: bold;
 }
 
+#on_bgp {
+  color: green;
+  font-weight: bold;
+}
+ 
+#off_bgp {
+  animation: blinker 1s linear infinite;
+  color: red  ;
+  font-weight: bold;
+}
+
 @keyframes blinker {
   50% {
     opacity: 0;

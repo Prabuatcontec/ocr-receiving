@@ -124,17 +124,9 @@ class VideoCamera(object):
                     HoldStatus(user).writeFile(
                         json.dumps([ele for ele in reversed(serials)]), "_serial")
 
-                    valid = ModelValidation().validate(
-                        jsonArray["data"], [ele for ele in reversed(serials)])
-
-                    if valid == '0':
-                        cv2.imwrite("static/uploads/boxER_%d.jpg" % ts, image)
-                    HoldStatus(user).writeFile(valid, "_scan")
-                        
                     break
                 elif key.replace('"', "") not in text:
                     continue
-        # print("--- %s seconds ---" % (time.time() - start_time))
         return [jpeg.tobytes(), 0]
 
     def get_Singleframe(self, user):
@@ -174,7 +166,7 @@ class VideoCamera(object):
             
             # if valid == '0':
             serials.append(fillenameImage)
-            cv2.imwrite("static/uploads/boxER_%s.jpg" % fillenameImage, image)
+            cv2.imwrite("static/processingImg/boxER_%s.jpg" % fillenameImage, image)
             file1 = open("static/uploads/_serial.txt", "a")  
             file1.write("\n")
             file1.write(json.dumps([ele for ele in reversed(serials)]))
@@ -210,7 +202,6 @@ class VideoCamera(object):
             text = pytesseract.image_to_string(Image.fromarray(img1))
             gmt = time.gmtime()
             ts = calendar.timegm(gmt)
-            print("Extracted eeText: ", text)
             if ret:
                 if text.upper().strip() != "":
                     cv2.imwrite("static/uploads/box_%d.jpg" %
@@ -221,7 +212,6 @@ class VideoCamera(object):
 
             if cv2.waitKey(0) & 0xFF == ord('q'):
                 break
-            print("Extracted Text: ", text)
         return frame
 
     def getImagesAndLabels(self, path):
@@ -399,7 +389,6 @@ class VideoCamera(object):
             #     break
             
             if motion == 1: 
-                print(' action')
                 time.append(datetime.now())
             else:
                 print('no action')

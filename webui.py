@@ -51,7 +51,6 @@ class WebUI(object):
         self.app.exec_()
 
     def _run_flask(self, host, port, debug=False, using_win32=False):
-        print(host)
         if using_win32:
             import pythoncom
             pythoncom.CoInitialize()

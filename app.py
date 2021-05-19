@@ -40,20 +40,22 @@ class App:
         self.count = 5
 
     def increment(self):
-        r = HoldStatus(self.js.document.getElementById(
-            "user").innerHTML).readFile("_scan")
+        r = HoldStatus("").readFile("_scan")
         if r == "1":
-            self.js.document.getElementById("on_status").style.display = "none"
-            self.js.document.getElementById(
-                "off_status").style.display = "block"
+            self.js.document.getElementById("on_status").style.display = "block"
+            self.js.document.getElementById("off_status").style.display = "none"
         else:
-            self.js.document.getElementById(
-                "on_status").style.display = "block"
-            self.js.document.getElementById(
-                "off_status").style.display = "none"
+            self.js.document.getElementById("on_status").style.display = "none"
+            self.js.document.getElementById("off_status").style.display = "block"
 
         r = HoldStatus("").readFile("_goodData")
         self.js.document.getElementById("dc_").innerHTML = r
+
+        r = HoldStatus("").readFile("_processing")
+        if r== "1":
+            self.js.document.getElementById("on_bgp").innerHTML = "Processing"
+        else:
+            self.js.document.getElementById("on_bgp").innerHTML = "Waiting"
 
 #background process happening without any refreshing
 @app.route('/background_process_enable/<string:val>')
@@ -80,16 +82,16 @@ def getFileName():
 
 @app.route("/video", methods=['POST','GET'])
 def ocr():
-   
     if request.method == 'POST':
         HoldStatus("").writeFile("-", "_serial")
-        HoldStatus(session['user']).writeFile("0", "_scan")
+        HoldStatus("").writeFile("0", "_scan")
         HoldStatus("").writeFile("0", "_serialrowcount")
         HoldStatus("").writeFile("", "_goodData")
+        HoldStatus("").writeFile("0", "_processing")
         dict = {}
         for value in Connection().getModels(request.form['customer']):
-            mdict1 = {value[1]:value[2]}  
-            dict.update(mdict1) 
+            mdict1 = {value[1]:value[2]}
+            dict.update(mdict1)
         HoldStatus("").writeFile(json.dumps(dict),"_validation")
         return App.render(render_template("ocr.html", user=session['user'] ))
 
