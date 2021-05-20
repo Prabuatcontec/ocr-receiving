@@ -33,7 +33,7 @@ class ImageProcess(object):
         
         with open("static/uploads/_serial.txt", 'r') as t:
             num_lines = sum(1 for line in open("static/uploads/_serial.txt"))
-            if(int(HoldStatus("").readFile("_serialrowcount")) == num_lines):
+            if(int(HoldStatus("").readFile("_serialrowcount")) == int(num_lines)):
                 self.updateFile("0","_processing")
 
             if(num_lines==0):
