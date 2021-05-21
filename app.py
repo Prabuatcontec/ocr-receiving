@@ -93,6 +93,7 @@ def ocr():
         HoldStatus("").writeFile("0", "_lastScanCount")
         HoldStatus("").writeFile("2", "_scan")
         HoldStatus("").writeFile("0", "_serialrowcount")
+        HoldStatus("").writeFile("0", "_serialpostCount")
         HoldStatus("").writeFile("", "_goodData")
         HoldStatus("").writeFile("0", "_processing")
         dict = {}
@@ -116,12 +117,21 @@ def maintenance():
         readText.readData()
         time.sleep(MAINTENANCE_INTERVAL)
 
+def postingData():
+    """ Background thread doing various maintenance tasks """
+    readText = ImageProcess()
+    while True:
+        # do things...
+        readText.postToDeepblu()
+        time.sleep(MAINTENANCE_INTERVAL)
+
 if __name__ == '__main__':
     app.secret_key = 'A0Zr98j/3yX R~XHHER!jmN]LWX/,?RT'
     # t1 = threading.Thread(target=onoff, name='t1')
     # t1.start()
 
-    MAINTENANCE_INTERVAL = .01
+    MAINTENANCE_INTERVAL = .1
 
     threading.Thread(target=maintenance, daemon=True).start()
+    threading.Thread(target=postingData, daemon=True).start()
     app.run(host="0.0.0.0", port=5000, debug=True)

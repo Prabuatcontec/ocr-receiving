@@ -3,8 +3,7 @@ import sys
 import pytesseract
 import cv2
 import numpy as np
-from PIL import Image, ImageTk, ImageEnhance
-from pyzbar import pyzbar
+from PIL import Image
 from flask import session
 import json
 import time
@@ -14,9 +13,11 @@ from scipy.ndimage import interpolation as inter
 import time
 from config import Config
 import os.path
+import requests
+
 ds_factor = 0.6
 
-os.environ['OMP_THREAD_LIMIT'] = '1'
+os.environ['OMP_THREAD_LIMIT'] = '2'
 class ImageProcess(object):
     def readData(self):
         
@@ -32,10 +33,6 @@ class ImageProcess(object):
 
             for i,line in enumerate(t):
                 self.updateFile("1","_processing")
-                print("start")
-                print(time.time())
-                print("**********")
-                self.updateFile(str(i),"_serialrowcount")
                 line = self.trimValue(line)
                 self.processImage(line)
                 if(int(num_lines -1) == int(i)):
@@ -114,7 +111,6 @@ class ImageProcess(object):
                             file1.write(str(dict))
                             HoldStatus("").writeFile("1", "_scan")
                             data=json.dumps(dict)
-                            self.postToDeepblu('/autoreceive/automation', data)
                             shutil.copy("static/processingImg/boxER_"+imName+".jpg","static/s3Bucket/boxER_"+imName+".jpg")
                             self.resetProcess()
                             break
@@ -130,18 +126,26 @@ class ImageProcess(object):
             if file.name.endswith(".jpg"):
                 os.unlink(file.path)
         HoldStatus("").writeFile("0", "_processing")
-        print("End")
-        print(time.time())
-        print("$$$$$$$$$$")
         HoldStatus("").writeFile("0", "_serialrowcount")
         HoldStatus("").writeFile("", "_serial")
         HoldStatus("").writeFile("", "_lastScan")
         HoldStatus("").writeFile("0", "_lastScanCount")
 
-    def postToDeepblu(self, url, data):
-        return 1
-        # response = requests.post(Config.DEEPBLU_URL + url, data,
-        #                         headers={'Content-Type': 'application/json', 
-        #                         'Authorization': 'Basic QVVUT1JFQ0VJVkU6YXV0b0AxMjM=' }
-        #                         )
+    def postToDeepblu(self):
+        with open("static/uploads/_goodData.txt", 'r') as t:
+            for i,line in enumerate(t):
+                r = HoldStatus("").readFile("_serialpostCount")
+                print(int(r))
+                print(int(i))
+                if(str(line) != "\n"):
+                    if(int(r) < i):
+                        
+                        line = line.replace("'",'"')
+                        response = requests.post(Config.DEEPBLU_URL + '/autoreceive/automation', line,
+                                    headers={'Content-Type': 'application/json', 
+                                    'Authorization': 'Basic QVVUT1JFQ0VJVkU6YXV0b0AxMjM=' }
+                                    )
+                        print(line)
+                        print(response)
+                        HoldStatus("").writeFile(str(i), "_serialpostCount")
         

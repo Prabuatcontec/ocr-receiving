@@ -149,14 +149,14 @@ class VideoCamera(object):
         gmt = time.gmtime()
         ts = calendar.timegm(gmt)
         barcodes = pyzbar.decode(image)
-        start_time = time.time()
 
         if len(barcodes) > 0:
-            fillenameImage = str(str(ts)+'-'+str(random.randint(0,99999)))
+            fillenameImage = str(str(ts)+'-'+str(random.randint(100000,999999)))
             
             serials = []
                     
             for barcode in barcodes:
+                print(barcode)
                 barcodeData = barcode.data.decode("utf-8")
                 if(self.detect_special_characer(barcodeData) == True):
                     serials.append(barcodeData)
