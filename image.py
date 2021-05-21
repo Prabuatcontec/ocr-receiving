@@ -1,29 +1,18 @@
 import os, shutil
 import sys
 import pytesseract
-import argparse
 import cv2
 import numpy as np
-import tkinter
-import re
 from PIL import Image, ImageTk, ImageEnhance
 from pyzbar import pyzbar
 from flask import session
 import json
-import calendar
-import asyncio
 import time
-from mysql import Connection
 from modelunitvalidation import ModelValidation
 from filehandling import HoldStatus
-import playsound
 from scipy.ndimage import interpolation as inter
-import math
 import time
-from requests.auth import HTTPBasicAuth
-import requests
 from config import Config
-import random
 import os.path
 ds_factor = 0.6
 
@@ -33,19 +22,24 @@ class ImageProcess(object):
         
         with open("static/uploads/_serial.txt", 'r') as t:
             num_lines = sum(1 for line in open("static/uploads/_serial.txt"))
-            if(int(HoldStatus("").readFile("_serialrowcount")) == int(num_lines)):
-                self.updateFile("0","_processing")
+
+            if(num_lines == ''):
+                num_lines = 0
 
             if(num_lines==0):
                 self.updateFile("0","_serialrowcount")
+                self.updateFile("0","_processing")
 
             for i,line in enumerate(t):
-                if(int(HoldStatus("").readFile("_serialrowcount")) <i):
-                    if(i>2):
-                        self.updateFile("1","_processing")
-                    self.updateFile(str(i),"_serialrowcount")
-                    line = self.trimValue(line)
-                    self.processImage(line)
+                self.updateFile("1","_processing")
+                print("start")
+                print(time.time())
+                print("**********")
+                self.updateFile(str(i),"_serialrowcount")
+                line = self.trimValue(line)
+                self.processImage(line)
+                if(int(num_lines -1) == int(i)):
+                    self.resetProcess()
                     
 
             return 1
@@ -57,7 +51,7 @@ class ImageProcess(object):
         line = line.split(',')
         return line
 
-    def updateFile(self, value, filename):
+    def updateFile(self, value, filename):  
         HoldStatus("").writeFile(value, filename)
 
     def processImage(self, line):
@@ -91,7 +85,6 @@ class ImageProcess(object):
                         newline = newline.replace(" ","")
                         
                         r = str(r.read())
-                        HoldStatus("").writeFile("0", "_scan")
                         if(r.find(newline) != -1):
                             p = 1
                             break
@@ -101,14 +94,12 @@ class ImageProcess(object):
                             oldSerial = newline
                             if newline.strip() in r:
                                 p = 1
-                                HoldStatus("").writeFile("1", "_scan")
                                 break
                         else:
                             mdict1 = {str("address"+str(c)): newline}
                             dict.update(mdict1)
                             if newline.strip() in r:
                                 p = 1
-                                HoldStatus("").writeFile("1", "_scan")
                                 break
 
                     if(p == 0):
@@ -125,22 +116,32 @@ class ImageProcess(object):
                             data=json.dumps(dict)
                             self.postToDeepblu('/autoreceive/automation', data)
                             shutil.copy("static/processingImg/boxER_"+imName+".jpg","static/s3Bucket/boxER_"+imName+".jpg")
-                            for file in os.scandir("static/processingImg"):
-                                if file.name.endswith(".jpg"):
-                                    os.unlink(file.path)
-                            HoldStatus("").writeFile("0", "_processing")
-                            HoldStatus("").writeFile("0", "_serialrowcount")
-                            HoldStatus("").writeFile("", "_serial")
+                            self.resetProcess()
                             break
                 else:
-                    print('invalid')
+                    HoldStatus("").writeFile("0", "_scan")
+
                 break
             elif key.replace('"', "") not in text:
                 continue
-    
+
+    def resetProcess(self):
+        for file in os.scandir("static/processingImg"):
+            if file.name.endswith(".jpg"):
+                os.unlink(file.path)
+        HoldStatus("").writeFile("0", "_processing")
+        print("End")
+        print(time.time())
+        print("$$$$$$$$$$")
+        HoldStatus("").writeFile("0", "_serialrowcount")
+        HoldStatus("").writeFile("", "_serial")
+        HoldStatus("").writeFile("", "_lastScan")
+        HoldStatus("").writeFile("0", "_lastScanCount")
+
     def postToDeepblu(self, url, data):
-        response = requests.post(Config.DEEPBLU_URL + url, data,
-                                headers={'Content-Type': 'application/json', 
-                                'Authorization': 'Basic QVVUT1JFQ0VJVkU6YXV0b0AxMjM=' }
-                                )
+        return 1
+        # response = requests.post(Config.DEEPBLU_URL + url, data,
+        #                         headers={'Content-Type': 'application/json', 
+        #                         'Authorization': 'Basic QVVUT1JFQ0VJVkU6YXV0b0AxMjM=' }
+        #                         )
         

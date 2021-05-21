@@ -25,7 +25,8 @@ class HoldStatus(object):
 
     def writeFile(self, val, name):
         file = open(Config.UPLOAD_FOLDER + str(self.user) + name + ".txt", "w")
-        file.write(val)
+        if(val != ""):
+            file.write(val)
         file.close()
 
     def readFile(self, name):

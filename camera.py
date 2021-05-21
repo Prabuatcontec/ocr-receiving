@@ -17,6 +17,7 @@ from mysql import Connection
 from modelunitvalidation import ModelValidation
 from filehandling import HoldStatus
 import playsound
+import re
 from scipy.ndimage import interpolation as inter
 import math
 import time
@@ -67,6 +68,19 @@ class VideoCamera(object):
         return img_byte_arr
 
     
+    def detect_special_characer(self, pass_string):
+        regex= re.compile("'") 
+        if(regex.search(pass_string) != None): 
+            return False
+         
+        regex= re.compile('[@_!#$%^&*()<>?/\\\|}{~:[\]]"') 
+        if(regex.search(pass_string) == None): 
+            res = True
+        else: 
+            res = False
+        return(res)
+
+    
     # Adding Function Attached To Mouse Callback
     def draw(self,event,x,y,flags,params):
         global ix,iy,drawing
@@ -95,7 +109,6 @@ class VideoCamera(object):
         gmt = time.gmtime()
         ts = calendar.timegm(gmt)
         barcodes = pyzbar.decode(image)
-        start_time = time.time()
 
         if len(barcodes) > 0:
             text = pytesseract.image_to_string(Image.fromarray(gray))
@@ -115,7 +128,6 @@ class VideoCamera(object):
                     jsonArray =json.loads(str(valid))
                     count = 0
                     serials = []
-                    
 
                     for barcode in barcodes:
                         barcodeData = barcode.data.decode("utf-8")
@@ -146,30 +158,26 @@ class VideoCamera(object):
                     
             for barcode in barcodes:
                 barcodeData = barcode.data.decode("utf-8")
-                serials.append(barcodeData)
-            # validation = data = open("static/uploads/_validation.txt", 'r').read()
-            # strVal = str(validation)
-            # models = json.loads(strVal)
-            # model = 'DMS2004UHD'
-            # valid = '1'
-            # for key, value in models.items():
-            #     if key.replace('"', "") == model:
-            #         valid = str(value).replace("'",'"')
-            #         jsonArray =json.loads(str(valid))
-            #         break
-            #     else:
-            #         continue
+                if(self.detect_special_characer(barcodeData) == True):
+                    serials.append(barcodeData)
             
-            # valid = ModelValidation().validate(
-            #                     jsonArray["data"], [ele for ele in reversed(serials)])
-            
-            
-            # if valid == '0':
+            lastScan = HoldStatus("").readFile("_lastScan")
+            lastSerialCount = HoldStatus("").readFile("_lastScanCount")
+            # print("last Scan = "+ str(fillenameImage) +"======"+ str(lastScan) +"======"+ str(json.dumps([ele for ele in reversed(serials)])))
+            # print("last Scancount = "+ str(lastSerialCount) +"======"+ str(len(serials)))
+            if(str(lastScan) == str(json.dumps([ele for ele in reversed(serials)]))):
+                return [jpeg.tobytes(), 0]
+            if(int(lastSerialCount) > int(len(serials))):
+                return [jpeg.tobytes(), 0] 
+
+            HoldStatus("").writeFile(json.dumps([ele for ele in reversed(serials)]), "_lastScan")
+            HoldStatus("").writeFile(str(len(serials)), "_lastScanCount")
+
             serials.append(fillenameImage)
             cv2.imwrite("static/processingImg/boxER_%s.jpg" % fillenameImage, image)
-            file1 = open("static/uploads/_serial.txt", "a")  
-            file1.write("\n")
+            file1 = open("static/uploads/_serial.txt", "a")
             file1.write(json.dumps([ele for ele in reversed(serials)]))
+            file1.write("\n")
         return [jpeg.tobytes(), 0]
 
     def rotate(image, angle):
@@ -409,3 +417,59 @@ class VideoCamera(object):
         
         
         return [jpeg.tobytes(), 0]
+
+
+
+
+# print("last Scan = "+ str(fillenameImage) +"======"+ str(lastScan) +"======"+ str(json.dumps([ele for ele in reversed(serials)])))
+# print("last Scancount = "+ str(lastSerialCount) +"======"+ str(len(serials)))
+
+# last Scancount = 0======2
+# serve_1  | last Scan = 1621574702-43908======["EVLA31D07233", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 2======3
+# serve_1  | last Scan = 1621574702-13820======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "1910031215805239"]
+# serve_1  | last Scancount = 3======2
+# serve_1  | last Scan = 1621574702-94181======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233"]
+# serve_1  | last Scancount = 3======1
+# serve_1  | last Scan = 1621574702-4701======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574702-74095======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574702-43826======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574702-6432======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574702-23436======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "1910031215805239"]
+# serve_1  | last Scancount = 3======2
+# serve_1  | last Scan = 1621574702-83570======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574703-24507======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233"]
+# serve_1  | last Scancount = 3======1
+# serve_1  | last Scan = 1621574703-47189======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======2
+# serve_1  | last Scan = 1621574703-42123======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574703-89449======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574703-29525======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574703-46066======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574703-45580======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574703-14000======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574703-55236======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574703-14777======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574703-32010======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574704-58833======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574704-88412======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574704-7100======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3
+# serve_1  | last Scan = 1621574704-93======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]======["EVLA31D07233", "12BF01DC50BD", "1910031215805239"]
+# serve_1  | last Scancount = 3======3

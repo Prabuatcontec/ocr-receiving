@@ -43,10 +43,15 @@ class App:
         r = HoldStatus("").readFile("_scan")
         if r == "1":
             self.js.document.getElementById("on_status").style.display = "block"
-            self.js.document.getElementById("off_status").style.display = "none"
+            self.js.document.getElementById("on_status").style.color = "green"
+            self.js.document.getElementById("on_status").innerHTML = "Valid"
+        elif r =="2":
+            self.js.document.getElementById("on_status").style.color = "green"
+            self.js.document.getElementById("on_status").innerHTML = "Running"
         else:
-            self.js.document.getElementById("on_status").style.display = "none"
-            self.js.document.getElementById("off_status").style.display = "block"
+            self.js.document.getElementById("on_status").style.display = "block"
+            self.js.document.getElementById("on_status").style.color = "red"
+            self.js.document.getElementById("on_status").innerHTML = "In-valid"
 
         r = HoldStatus("").readFile("_goodData")
         self.js.document.getElementById("dc_").innerHTML = r
@@ -83,8 +88,10 @@ def getFileName():
 @app.route("/video", methods=['POST','GET'])
 def ocr():
     if request.method == 'POST':
-        HoldStatus("").writeFile("-", "_serial")
-        HoldStatus("").writeFile("0", "_scan")
+        HoldStatus("").writeFile("", "_serial")
+        HoldStatus("").writeFile("", "_lastScan")
+        HoldStatus("").writeFile("0", "_lastScanCount")
+        HoldStatus("").writeFile("2", "_scan")
         HoldStatus("").writeFile("0", "_serialrowcount")
         HoldStatus("").writeFile("", "_goodData")
         HoldStatus("").writeFile("0", "_processing")
@@ -114,7 +121,7 @@ if __name__ == '__main__':
     # t1 = threading.Thread(target=onoff, name='t1')
     # t1.start()
 
-    MAINTENANCE_INTERVAL = .1
+    MAINTENANCE_INTERVAL = .01
 
     threading.Thread(target=maintenance, daemon=True).start()
     app.run(host="0.0.0.0", port=5000, debug=True)
