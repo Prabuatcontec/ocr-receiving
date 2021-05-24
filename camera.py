@@ -143,8 +143,50 @@ class VideoCamera(object):
 
     def get_Singleframe(self, user):
         success, image = self.video.read()
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        ret, jpeg = cv2.imencode('.jpg', image)
+        img1 = image
+        # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+         
+        # th, threshed = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
+
+        # ## (2) Morph-op to remove noise
+        # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11,11))
+        # morphed = cv2.morphologyEx(threshed, cv2.MORPH_CLOSE, kernel)
+
+        # ## (3) Find the max-area contour
+        # cnts = cv2.findContours(morphed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+        # cnt = sorted(cnts, key=cv2.contourArea)[-1]
+
+        # ## This will extract the rotated rect from the contour
+        # rot_rect = cv2.minAreaRect(cnt)
+
+        # # Extract useful data
+        # cx,cy = (rot_rect[0][0], rot_rect[0][1]) # rect center
+        # sx,sy = (rot_rect[1][0], rot_rect[1][1]) # rect size
+        # angle = rot_rect[2] # rect angle
+
+        # # Set model points : The original shape
+        # model_pts = np.array([[0,sy],[0,0],[sx,0],[sx,sy]]).astype('int')
+        # # Set detected points : Points on the image
+        # current_pts = cv2.boxPoints(rot_rect).astype('int')
+
+        # # sort the points to ensure match between model points and current points
+        # ind_model = np.lexsort((model_pts[:,1],model_pts[:,0]))
+        # ind_current = np.lexsort((current_pts[:,1],current_pts[:,0]))
+
+        # model_pts = np.array([model_pts[i] for i in ind_model])
+        # current_pts = np.array([current_pts[i] for i in ind_current])
+
+        # # Estimate the transform betwee points
+        # M = cv2.estimateRigidTransform(current_pts,model_pts,True)
+
+        # # Wrap the image
+        # gmt = time.gmtime()
+        # ts = calendar.timegm(gmt)
+        # image = cv2.warpAffine(gray, M, (int(sx),int(sy)))
+
+        
+        ret, jpeg = cv2.imencode('.jpg', img1)
        
         gmt = time.gmtime()
         ts = calendar.timegm(gmt)
