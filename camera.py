@@ -28,6 +28,8 @@ import random
 import pandas
 from datetime import datetime 
 import pickle
+import imutils
+
 ds_factor = 0.6
 path = 'dataset'
 image = np.zeros((512,512,3))
@@ -74,53 +76,45 @@ class VideoCamera(object):
     def get_Singleframe(self, user):
         success, image = self.video.read()
         img1 = image
-        # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-         
-        # th, threshed = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
+        # compute the Scharr gradient magnitude representation of the images
+        # in both the x and y direction using OpenCV 2.4
+        ddepth = cv2.cv.CV_32F if imutils.is_cv2() else cv2.CV_32F
+        gradX = cv2.Sobel(gray, ddepth=ddepth, dx=1, dy=0, ksize=-1)
+        gradY = cv2.Sobel(gray, ddepth=ddepth, dx=0, dy=1, ksize=-1)
 
-        # ## (2) Morph-op to remove noise
-        # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11,11))
-        # morphed = cv2.morphologyEx(threshed, cv2.MORPH_CLOSE, kernel)
+        # subtract the y-gradient from the x-gradient
+        gradient = cv2.subtract(gradX, gradY)
+        gradient = cv2.convertScaleAbs(gradient)
 
-        # ## (3) Find the max-area contour
-        # cnts = cv2.findContours(morphed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-        # cnt = sorted(cnts, key=cv2.contourArea)[-1]
+        # blur and threshold the image
+        blurred = cv2.blur(gradient, (9, 9))
+        (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
 
-        # ## This will extract the rotated rect from the contour
-        # rot_rect = cv2.minAreaRect(cnt)
+        coords = np.column_stack(np.where(thresh > 0))
+        angle = cv2.minAreaRect(coords)[-1]
+        if angle < -45:
+            angle = -(90 + angle)
+        # otherwise, just take the inverse of the angle to make
+        # it positive
+        else:
+            angle = -angle
 
-        # # Extract useful data
-        # cx,cy = (rot_rect[0][0], rot_rect[0][1]) # rect center
-        # sx,sy = (rot_rect[1][0], rot_rect[1][1]) # rect size
-        # angle = rot_rect[2] # rect angle
-
-        # # Set model points : The original shape
-        # model_pts = np.array([[0,sy],[0,0],[sx,0],[sx,sy]]).astype('int')
-        # # Set detected points : Points on the image
-        # current_pts = cv2.boxPoints(rot_rect).astype('int')
-
-        # # sort the points to ensure match between model points and current points
-        # ind_model = np.lexsort((model_pts[:,1],model_pts[:,0]))
-        # ind_current = np.lexsort((current_pts[:,1],current_pts[:,0]))
-
-        # model_pts = np.array([model_pts[i] for i in ind_model])
-        # current_pts = np.array([current_pts[i] for i in ind_current])
-
-        # # Estimate the transform betwee points
-        # M = cv2.estimateRigidTransform(current_pts,model_pts,True)
-
-        # # Wrap the image
-        # gmt = time.gmtime()
-        # ts = calendar.timegm(gmt)
-        # image = cv2.warpAffine(gray, M, (int(sx),int(sy)))
+        (h, w) = image.shape[:2]
+        center = (w // 2, h // 2)
+        M = cv2.getRotationMatrix2D(center, angle, 1.0)
+        rotated = cv2.warpAffine(image, M, (w, h),
+            flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+        cv2.putText(rotated, "Angle: {:.2f} degrees".format(angle),
+	        (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
         
-        ret, jpeg = cv2.imencode('.jpg', img1)
+        ret, jpeg = cv2.imencode('.jpg', image)
        
         gmt = time.gmtime()
         ts = calendar.timegm(gmt)
-        barcodes = pyzbar.decode(image)
+        barcodes = pyzbar.decode(rotated)
 
         if len(barcodes) > 0:
             fillenameImage = str(str(ts)+'-'+str(random.randint(100000,999999)))
@@ -145,7 +139,7 @@ class VideoCamera(object):
             HoldStatus("").writeFile(str(len(serials)), "_lastScanCount")
 
             serials.append(fillenameImage)
-            cv2.imwrite("static/processingImg/boxER_%s.jpg" % fillenameImage, image)
+            cv2.imwrite("static/processingImg/boxER_%s.jpg" % fillenameImage, rotated)
             file1 = open("static/uploads/_serial.txt", "a")
             file1.write(json.dumps([ele for ele in reversed(serials)]))
             file1.write("\n")
