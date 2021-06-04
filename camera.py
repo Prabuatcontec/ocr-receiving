@@ -50,8 +50,8 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 class VideoCamera(object):
     def __init__(self):
         self.video = cv2.VideoCapture(0)
-        self.video.set(cv2.CAP_PROP_FRAME_WIDTH, 10000)
-        self.video.set(cv2.CAP_PROP_FRAME_HEIGHT, 10000)
+        self.video.set(cv2.CAP_PROP_FRAME_WIDTH, 2048)
+        self.video.set(cv2.CAP_PROP_FRAME_HEIGHT, 1536)
 
     def __del__(self):
         self.video.release()
@@ -99,6 +99,9 @@ class VideoCamera(object):
         number_of_squares_Y = 7  # Number of chessboard squares along the y-axis
         nX = number_of_squares_X - 1 # Number of interior corners along x-axis
         nY = number_of_squares_Y - 1 # Number of interior corners along y-axis
+        r = HoldStatus("").readFile("_scan")
+
+        
 
         # Store vectors of 3D points for all chessboard images (world coordinate frame)
         object_points = []
@@ -248,8 +251,8 @@ class VideoCamera(object):
         dist = calib_result_pickle["dist"]
         
 
-        image = cv2.undistort(image, mtx, dist, None, 
-                                    optimal_camera_matrix)
+        # image = cv2.undistort(image, mtx, dist, None, 
+        #                             optimal_camera_matrix)
 
         
         ret, jpeg = cv2.imencode('.jpg', image)
