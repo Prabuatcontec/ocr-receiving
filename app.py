@@ -75,9 +75,22 @@ def video_feed(user):
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+@app.route('/video_feed_cali/<string:user>')
+def video_feed_cali(user):
+    return Response(gen_cal( VideoCamera(), user),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
 def gen(camera, user):
     while True:
         frame = camera.get_Singleframe(user)
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame[0] + b'\r\n\r\n')
+
+
+def gen_cal(camera, user):
+    while True:
+        frame = camera.get_Caliberation(user)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame[0] + b'\r\n\r\n')
 
@@ -103,6 +116,11 @@ def ocr():
            dict.update(mdict1)
         HoldStatus("").writeFile(json.dumps(dict),"_validation")
         return App.render(render_template("ocr.html", user=session['user'] ))
+
+@app.route("/calibration", methods=['POST','GET'])
+def calib():
+    if request.method == 'GET':
+        return App.render(render_template("calibration.html", user=session['user'] ))
 
 @app.route("/logout", methods=['GET'])
 def logout():

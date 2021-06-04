@@ -135,8 +135,6 @@ class ImageProcess(object):
         with open("static/uploads/_goodData.txt", 'r') as t:
             for i,line in enumerate(t):
                 r = HoldStatus("").readFile("_serialpostCount")
-                print(int(r))
-                print(int(i))
                 if(str(line) != "\n"):
                     if(int(r) < i):
                         
@@ -145,7 +143,5 @@ class ImageProcess(object):
                                     headers={'Content-Type': 'application/json', 
                                     'Authorization': 'Basic QVVUT1JFQ0VJVkU6YXV0b0AxMjM=' }
                                     )
-                        print(line)
-                        print(response)
                         HoldStatus("").writeFile(str(i), "_serialpostCount")
         

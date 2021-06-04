@@ -29,6 +29,7 @@ import pandas
 from datetime import datetime 
 import pickle
 import imutils
+import glob
 
 ds_factor = 0.6
 path = 'dataset'
@@ -49,6 +50,8 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 class VideoCamera(object):
     def __init__(self):
         self.video = cv2.VideoCapture(0)
+        self.video.set(cv2.CAP_PROP_FRAME_WIDTH, 10000)
+        self.video.set(cv2.CAP_PROP_FRAME_HEIGHT, 10000)
 
     def __del__(self):
         self.video.release()
@@ -73,10 +76,140 @@ class VideoCamera(object):
             res = False
         return(res)
 
-    def get_Singleframe(self, user):
+    def Zoom(self, cv2Object, zoomSize):
+        # Resizes the image/video frame to the specified amount of "zoomSize".
+        # A zoomSize of "2", for example, will double the canvas size
+        cv2Object = imutils.resize(cv2Object, width=(zoomSize * cv2Object.shape[1]))
+        # center is simply half of the height & width (y/2,x/2)
+        center = (cv2Object.shape[0]/2,cv2Object.shape[1]/2)
+        # cropScale represents the top left corner of the cropped frame (y/x)
+        cropScale = (center[0]/zoomSize, center[1]/zoomSize)
+        # The image/video frame is cropped to the center with a size of the original picture
+        # image[y1:y2,x1:x2] is used to iterate and grab a portion of an image
+        # (y1,x1) is the top left corner and (y2,x1) is the bottom right corner of new cropped frame.
+        cv2Object = cv2Object[int(cropScale[0]):(int(center[0]) + int(cropScale[0])), int(cropScale[1]):(int(center[1]) + int(cropScale[1]))]
+        return cv2Object
+
+
+    def get_Caliberation(self,user):
+        filename = 'pattern.png'
+ 
+# Chessboard dimensions
+        number_of_squares_X = 10 # Number of chessboard squares along the x-axis
+        number_of_squares_Y = 7  # Number of chessboard squares along the y-axis
+        nX = number_of_squares_X - 1 # Number of interior corners along x-axis
+        nY = number_of_squares_Y - 1 # Number of interior corners along y-axis
+
+        # Store vectors of 3D points for all chessboard images (world coordinate frame)
+        object_points = []
+        
+        # Store vectors of 2D points for all chessboard images (camera coordinate frame)
+        image_points = []
+        
+        # Set termination criteria. We stop either when an accuracy is reached or when
+        # we have finished a certain number of iterations.
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+        
+        # Define real world coordinates for points in the 3D coordinate frame
+        # Object points are (0,0,0), (1,0,0), (2,0,0) ...., (5,8,0)
+        object_points_3D = np.zeros((nX * nY, 3), np.float32)       
+        
+        # These are the x and y coordinates                                              
+        object_points_3D[:,:2] = np.mgrid[0:nY, 0:nX].T.reshape(-1, 2) 
+
         success, image = self.video.read()
+        
+        #image = self.Zoom(image,2)
+        img1 = image
+        image = cv2.imread('1622798624-214896_undistorted.jpg')
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        ret, jpeg = cv2.imencode('.jpg', image)
+        
+        
+         # Find the corners on the chessboard
+        success, corners = cv2.findChessboardCorners(gray, (nY, nX), None)
+        
+        images = glob.glob('*.jpg')
+     
+  # Go through each chessboard image, one by one
+        for image_file in images:
+        
+            # Load the image
+            image = cv2.imread(image_file)  
+        
+            # Convert the image to grayscale
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  
+        
+            # Find the corners on the chessboard
+            success, corners = cv2.findChessboardCorners(gray, (nY, nX), None)
+            
+            # If the corners are found by the algorithm, draw them
+            if success == True:
+        
+            # Append object points
+                object_points.append(object_points_3D)
+            
+                # Find more exact corner pixels       
+                corners_2 = cv2.cornerSubPix(gray, corners, (11,11), (-1,-1), criteria)       
+                
+                        # Append image points
+                image_points.append(corners)
+            
+                # Draw the corners
+                cv2.drawChessboardCorners(image, (nY, nX), corners_2, success)
+        
+            # Display the image. Used for testing.
+            #cv2.imshow("Image", image) 
+            
+            # Display the window for a short period. Used for testing.
+            #cv2.waitKey(200) 
+
+        distorted_image = image
+
+        # Perform camera calibration to return the camera matrix, distortion coefficients, rotation and translation vectors etc 
+        ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(object_points, 
+                                                            image_points, 
+                                                            gray.shape[::-1], 
+                                                            None, 
+                                                            None)
+        
+        # Get the dimensions of the image 
+        height, width = distorted_image.shape[:2]
+            
+        # Refine camera matrix
+        # Returns optimal camera matrix and a rectangular region of interest
+        optimal_camera_matrix, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, 
+                                                                    (width,height), 
+                                                                    1, 
+                                                                    (width,height))
+        
+        # Undistort the image 
+        
+
+        # Create the output file name by removing the '.jpg' part
+        
+
+        calib_result_pickle = {}
+        calib_result_pickle["mtx"] = mtx
+        calib_result_pickle["optimal_camera_matrix"] = optimal_camera_matrix
+        calib_result_pickle["dist"] = dist
+        calib_result_pickle["rvecs"] = rvecs
+        calib_result_pickle["tvecs"] = tvecs
+        pickle.dump(calib_result_pickle, open("static/uploads/camera_calib_pickle.p", "wb" )) 
+             
+        return [jpeg.tobytes(), 0]
+
+
+    def get_Singleframe(self, user):
+        cv2_version_major = int(cv2.__version__.split('.')[0])
+
+        
+        success, image = self.video.read()
+        #image = self.Zoom(image,2)
         img1 = image
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        
 
         # compute the Scharr gradient magnitude representation of the images
         # in both the x and y direction using OpenCV 2.4
@@ -90,7 +223,7 @@ class VideoCamera(object):
 
         # blur and threshold the image
         blurred = cv2.blur(gradient, (9, 9))
-        (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
+        (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)   
 
         coords = np.column_stack(np.where(thresh > 0))
         angle = cv2.minAreaRect(coords)[-1]
@@ -108,6 +241,15 @@ class VideoCamera(object):
             flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
         cv2.putText(rotated, "Angle: {:.2f} degrees".format(angle),
 	        (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        
+        calib_result_pickle = pickle.load(open("static/uploads/camera_calib_pickle.p", "rb" ))
+        mtx = calib_result_pickle["mtx"]
+        optimal_camera_matrix = calib_result_pickle["optimal_camera_matrix"]
+        dist = calib_result_pickle["dist"]
+        
+
+        image = cv2.undistort(image, mtx, dist, None, 
+                                    optimal_camera_matrix)
 
         
         ret, jpeg = cv2.imencode('.jpg', image)
