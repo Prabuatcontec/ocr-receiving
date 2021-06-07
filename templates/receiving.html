@@ -15,7 +15,7 @@
           </select>
         </div>
       </div>
-      <div class="form-group">
+      <div class="form-group" style="display: none;">
         <label for="company">Model</label>
         <div>
           <select id="model" name="model" class="form-control">
@@ -93,7 +93,8 @@
     $(".upload-form").removeClass("off-canvas");
     $("select#customer").change(function () {
       $("#overlay").fadeIn();
-      // document.getElementById("receiving").submit();
+       document.getElementById("receiving").submit();
+       return 1
       var customerId = $(this).find("option:selected").val();
       $('#model').find('option:not(:first)').remove();
       $("#overlay").fadeIn();

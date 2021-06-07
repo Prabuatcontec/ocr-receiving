@@ -75,9 +75,22 @@ def video_feed(user):
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+@app.route('/video_feed_cali/<string:user>')
+def video_feed_cali(user):
+    return Response(gen_cal( VideoCamera(), user),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
 def gen(camera, user):
     while True:
         frame = camera.get_Singleframe(user)
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame[0] + b'\r\n\r\n')
+
+
+def gen_cal(camera, user):
+    while True:
+        frame = camera.get_Caliberation(user)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame[0] + b'\r\n\r\n')
 
@@ -87,7 +100,7 @@ def getFileName():
 
 @app.route("/video", methods=['POST','GET'])
 def ocr():
-    if request.method == 'POST':
+    if request.method == 'GET':
         HoldStatus("").writeFile("", "_serial")
         HoldStatus("").writeFile("", "_lastScan")
         HoldStatus("").writeFile("0", "_lastScanCount")
@@ -102,7 +115,12 @@ def ocr():
            mdict1 = {value[1]:value[2]}
            dict.update(mdict1)
         HoldStatus("").writeFile(json.dumps(dict),"_validation")
-        return App.render(render_template("ocr.html", user=session['user'] ))
+        return App.render(render_template("ocr.html", user=123))
+
+@app.route("/calibration", methods=['POST','GET'])
+def calib():
+    if request.method == 'GET':
+        return App.render(render_template("calibration.html", user=1233))
 
 @app.route("/logout", methods=['GET'])
 def logout():
