@@ -1,2 +1,0 @@
-
-{'serial': 'EVLA31D07233', 'address1': '12BF01DC50BD', 'address2': '1910031215805239', 'model': 'DMS2004UHD'}
