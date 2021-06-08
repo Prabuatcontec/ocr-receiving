@@ -52,8 +52,7 @@ class VideoCamera(object):
         self.video = cv2.VideoCapture(0)
         self.video.set(cv2.CAP_PROP_FRAME_WIDTH, 1000)
         self.video.set(cv2.CAP_PROP_FRAME_HEIGHT, 800)
-        self.video.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-        self.video.set(cv2.CAP_PROP_FPS, 30)
+        self.video.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('H', '2', '6', '4'))
 
     def __del__(self):
         self.video.release()
@@ -130,6 +129,12 @@ class VideoCamera(object):
 
         
         success, image = self.video.read()
+        calib_result_pickle = pickle.load(open("static/uploads/camera_calib_pickle.p", "rb" ))
+        mtx = calib_result_pickle["mtx"]
+        optimal_camera_matrix = calib_result_pickle["optimal_camera_matrix"]
+        dist = calib_result_pickle["dist"]
+        image = cv2.undistort(image, mtx, dist, None, 
+                                    optimal_camera_matrix)
         #image = self.Zoom(image,2)
         img1 = image
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -162,19 +167,14 @@ class VideoCamera(object):
         (h, w) = image.shape[:2]
         center = (w // 2, h // 2)
         M = cv2.getRotationMatrix2D(center, angle, 1.0)
+        
+
         rotated = cv2.warpAffine(image, M, (w, h),
             flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
         cv2.putText(rotated, "Angle: {:.2f} degrees".format(angle),
 	        (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         
-        calib_result_pickle = pickle.load(open("static/uploads/camera_calib_pickle.p", "rb" ))
-        mtx = calib_result_pickle["mtx"]
-        optimal_camera_matrix = calib_result_pickle["optimal_camera_matrix"]
-        dist = calib_result_pickle["dist"]
         
-
-        image = cv2.undistort(image, mtx, dist, None, 
-                                    optimal_camera_matrix)
 
         
         ret, jpeg = cv2.imencode('.jpg', image)
