@@ -16,6 +16,10 @@ import os.path
 import requests
 import pickle
 import glob
+import imutils
+from pyzbar import pyzbar
+import random
+import re
 
 ds_factor = 0.6
 
@@ -147,10 +151,180 @@ class ImageProcess(object):
                                     )
                         HoldStatus("").writeFile(str(i), "_serialpostCount")
 
+
+    def processImage(self):
+        images = glob.glob('static/processingImg/*.jpg')
+        for image_file in images:
+            
+            if os.path.isfile(image_file):
+                image = cv2.imread(image_file)
+                print(image_file)
+                # Convert the image to grayscale
+                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
+
+                # compute the Scharr gradient magnitude representation of the images
+                # in both the x and y direction using OpenCV 2.4
+                ddepth = cv2.cv.CV_32F if imutils.is_cv2() else cv2.CV_32F
+                gradX = cv2.Sobel(gray, ddepth=ddepth, dx=1, dy=0, ksize=-1)
+                gradY = cv2.Sobel(gray, ddepth=ddepth, dx=0, dy=1, ksize=-1)
+
+                # subtract the y-gradient from the x-gradient
+                gradient = cv2.subtract(gradX, gradY)
+                gradient = cv2.convertScaleAbs(gradient)
+
+                # blur and threshold the image
+                blurred = cv2.blur(gradient, (9, 9))
+                (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)   
+
+                coords = np.column_stack(np.where(thresh > 0))
+                angle = cv2.minAreaRect(coords)[-1]
+                if angle < -45:
+                    angle = -(90 + angle)
+                # otherwise, just take the inverse of the angle to make
+                # it positive
+                else:
+                    angle = -angle
+
+                (h, w) = image.shape[:2]
+                center = (w // 2, h // 2)
+                M = cv2.getRotationMatrix2D(center, angle, 1.0)
+                
+
+                rotated = cv2.warpAffine(image, M, (w, h),
+                    flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+                cv2.putText(rotated, "Angle: {:.2f} degrees".format(angle),
+                    (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+                barcodes = pyzbar.decode(rotated)
+                if len(barcodes) > 0:
+                    print(str(len(barcodes)))
+                    serials = []
+                            
+                    for barcode in barcodes:
+                        barcodeData = barcode.data.decode("utf-8")
+                        if(self.detect_special_characer(barcodeData) == True):
+                            serials.append(barcodeData)
+                    
+                    lastScan = HoldStatus("").readFile("_goodData")
+                    splitImage = image_file.split("_")
+                    
+                    # print("last Scan = "+ str(fillenameImage) +"======"+ str(lastScan) +"======"+ str(json.dumps([ele for ele in reversed(serials)])))
+                    # print("last Scancount = "+ str(lastSerialCount) +"======"+ str(len(serials)))
+                    if(str(lastScan) == str(json.dumps([ele for ele in reversed(serials)]))):
+                        os.remove(image_file)
+                        for file in os.scandir("static/processingImg"):
+                            if file.name.startswith(splitImage[0]):
+                                os.unlink(file.path)
+                        HoldStatus("").writeFile("0", "_processing")
+                        HoldStatus("").writeFile("0", "_serialrowcount")
+                        HoldStatus("").writeFile("", "_serial")
+                        HoldStatus("").writeFile("", "_lastScan")
+                        HoldStatus("").writeFile("0", "_lastScanCount")
+
+                    else:
+
+                        gray = cv2.cvtColor(rotated, cv2.COLOR_BGR2GRAY)
+                        text = pytesseract.image_to_string(Image.fromarray(gray))
+                        validation = open("static/uploads/_validation.txt", 'r').read()
+                        strVal = str(validation)
+                        models = json.loads(strVal)
+                        for key, value in models.items():
+                            if key.replace('"', "") in text:
+                                model = key
+                                valid = str(value).replace("'",'"')
+                                jsonArray =json.loads(str(valid))
+                                count = 0
+                                print(jsonArray["data"])
+                                print(serials)
+                                valid = ModelValidation().validate(
+                                    jsonArray["data"], [ele for ele in reversed(serials)])
+                                print('valid')
+                                print(valid)
+                                if valid == '0':
+                                    dict = {}
+                                    p = 0
+                                    for c in range(len(serials)):
+                                        r = open("static/uploads/_goodData.txt", "r")
+                                        newline = serials[c].replace("\n","")
+                                        newline = newline.replace(" ","")
+                                        
+                                        r = str(r.read())
+                                        if(r.find(newline) != -1):
+                                            p = 1
+                                            for file in os.scandir("static/processingImg"):
+                                                    if file.name.startswith(splitImage[0]):
+                                                        os.unlink(file.path)
+                                            break
+                                        if(c == 0):
+                                            mdict1 = {"serial": newline}
+                                            dict.update(mdict1)
+                                            oldSerial = newline
+                                            if newline.strip() in r:
+                                                p = 1
+                                                for file in os.scandir("static/processingImg"):
+                                                    if file.name.startswith(splitImage[0]):
+                                                        os.unlink(file.path)
+                                                break
+                                        else:
+                                            mdict1 = {str("address"+str(c)): newline}
+                                            dict.update(mdict1)
+                                            if newline.strip() in r:
+                                                p = 1
+                                                for file in os.scandir("static/processingImg"):
+                                                    if file.name.startswith(splitImage[0]):
+                                                        os.unlink(file.path)
+                                                break
+
+                                    if(p == 0):
+                                        print('valid')
+                                        mdict1 = {"model": str(model)}
+                                        dict.update(mdict1)
+                                        
+                                        if(oldSerial in r):
+                                            break
+                                        else:
+                                            file1 = open("static/uploads/_goodData.txt", "a")
+                                            file1.write("\n")
+                                            file1.write(str(dict))
+                                            HoldStatus("").writeFile("1", "_scan")
+                                            data=json.dumps(dict)
+                                            shutil.copy("static/processingImg/"+image_file,"static/s3Bucket/"+image_file)
+                                            for file in os.scandir("static/processingImg"):
+                                                if file.name.startswith(splitImage[0]):
+                                                    os.unlink(file.path)
+                                            HoldStatus("").writeFile("0", "_processing")
+                                            HoldStatus("").writeFile("0", "_serialrowcount")
+                                            HoldStatus("").writeFile("", "_serial")
+                                            HoldStatus("").writeFile("", "_lastScan")
+                                            HoldStatus("").writeFile("0", "_lastScanCount")
+                                            break
+                                else:
+                                    HoldStatus("").writeFile("0", "_scan")
+                                    if os.path.isfile(image_file):
+                                        os.remove(image_file)
+                            else:
+                                HoldStatus("").writeFile("0", "_scan")
+                                if os.path.isfile(image_file):
+                                    os.remove(image_file)
+                else:
+                    if os.path.isfile(image_file):
+                        print(image_file)
+                        print('delte')
+                        os.remove(image_file)
+                
+    def detect_special_characer(self, pass_string):
+        regex= re.compile("'") 
+        if(regex.search(pass_string) != None): 
+            return False
+         
+        regex= re.compile('[@_!#$%^&*()<>?/\\\|}{~:[\]]"') 
+        if(regex.search(pass_string) == None): 
+            res = True
+        else: 
+            res = False
+        return(res)
     
     def calibrateIt(self):
-
-        print(2)
  
         # Chessboard dimensions
         number_of_squares_X = 10 # Number of chessboard squares along the x-axis

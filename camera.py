@@ -211,3 +211,51 @@ class VideoCamera(object):
             file1.write(json.dumps([ele for ele in reversed(serials)]))
             file1.write("\n")
         return [jpeg.tobytes(), 0]
+
+
+
+    def get_Singleframe_gus(self, user):
+
+        
+        success, image = self.video.read()
+        calib_result_pickle = pickle.load(open("static/uploads/camera_calib_pickle.p", "rb" ))
+        mtx = calib_result_pickle["mtx"]
+        optimal_camera_matrix = calib_result_pickle["optimal_camera_matrix"]
+        dist = calib_result_pickle["dist"]
+        image = cv2.undistort(image, mtx, dist, None, 
+                                    optimal_camera_matrix)
+        #image = self.Zoom(image,2)
+        img1 = image
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        grayGuss = cv2.GaussianBlur(gray, (21, 21), 0)
+        diff_frame = cv2.absdiff(gray, grayGuss)
+        thresh_frame = cv2.threshold(diff_frame, 30, 255, cv2.THRESH_BINARY)[1]
+        thresh_frame = cv2.dilate(thresh_frame, None, iterations = 2)
+        gmt = time.gmtime()
+        ts = calendar.timegm(gmt)
+        
+        fillenameImage = str(str(ts)+'-'+str(random.randint(100000,999999)))
+
+        
+
+        (_, cnts, _) = cv2.findContours(thresh_frame.copy(),  
+                            1, 2) 
+        ret, jpeg = cv2.imencode('.jpg', image)
+        for contour in cnts: 
+            if cv2.contourArea(contour) > 10000: 
+                # (x, y, w, h) = cv2.boundingRect(contour) 
+                # cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 3) 
+                calib_result_pickle = pickle.load(open("static/uploads/filMe.p", "rb" ))
+                filMe = calib_result_pickle["filMe"]
+                cv2.imwrite("static/processingImg/"+str(filMe)+"_aaaaboxER_%s.jpg" % fillenameImage, image)
+                return [jpeg.tobytes(), 0]
+        filMe = str(random.randint(100000,999999))
+        calib_result_pickle = {}
+        calib_result_pickle["filMe"] = filMe
+        pickle.dump(calib_result_pickle, open("static/uploads/filMe.p", "wb" ))
+        return [jpeg.tobytes(), 0]
+
+
+
+        
