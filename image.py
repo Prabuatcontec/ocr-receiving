@@ -41,6 +41,7 @@ class ImageProcess(object):
                 self.updateFile("1","_processing")
                 line = self.trimValue(line)
                 self.processImage(line)
+                print(line)
                 if(int(num_lines -1) == int(i)):
                     self.resetProcess()
                     
@@ -128,9 +129,9 @@ class ImageProcess(object):
                 continue
 
     def resetProcess(self):
-        for file in os.scandir("static/processingImg"):
-            if file.name.endswith(".jpg"):
-                os.unlink(file.path)
+        #for file in os.scandir("static/processingImg"):
+        #    if file.name.endswith(".jpg"):
+        #        os.unlink(file.path)
         HoldStatus("").writeFile("0", "_processing")
         HoldStatus("").writeFile("0", "_serialrowcount")
         HoldStatus("").writeFile("", "_serial")
@@ -152,7 +153,7 @@ class ImageProcess(object):
                         HoldStatus("").writeFile(str(i), "_serialpostCount")
 
 
-    def processImage(self):
+    def processImage_gus(self):
         images = glob.glob('static/processingImg/*.jpg')
         for image_file in images:
             

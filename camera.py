@@ -50,8 +50,8 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 class VideoCamera(object):
     def __init__(self):
         self.video = cv2.VideoCapture(0)
-        self.video.set(cv2.CAP_PROP_FRAME_WIDTH, 1000)
-        self.video.set(cv2.CAP_PROP_FRAME_HEIGHT, 800)
+        self.video.set(cv2.CAP_PROP_FRAME_WIDTH, 900)
+        self.video.set(cv2.CAP_PROP_FRAME_HEIGHT, 700)
         self.video.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('H', '2', '6', '4'))
 
     def __del__(self):
@@ -133,8 +133,8 @@ class VideoCamera(object):
         mtx = calib_result_pickle["mtx"]
         optimal_camera_matrix = calib_result_pickle["optimal_camera_matrix"]
         dist = calib_result_pickle["dist"]
-        image = cv2.undistort(image, mtx, dist, None, 
-                                    optimal_camera_matrix)
+        #image = cv2.undistort(image, mtx, dist, None, 
+        #                            optimal_camera_matrix)
         #image = self.Zoom(image,2)
         img1 = image
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -177,14 +177,15 @@ class VideoCamera(object):
         
 
         
-        ret, jpeg = cv2.imencode('.jpg', image)
+        ret, jpeg = cv2.imencode('.jpg', gray)
        
         gmt = time.gmtime()
         ts = calendar.timegm(gmt)
         barcodes = pyzbar.decode(rotated)
-
+        fillenameImage = str(str(ts)+'-'+str(random.randint(100000,999999)))
+        #cv2.imwrite("static/processingImg/YYYboxER_%s.jpg" % fillenameImage, rotated)
         if len(barcodes) > 0:
-            fillenameImage = str(str(ts)+'-'+str(random.randint(100000,999999)))
+
             
             serials = []
                     
@@ -222,8 +223,8 @@ class VideoCamera(object):
         mtx = calib_result_pickle["mtx"]
         optimal_camera_matrix = calib_result_pickle["optimal_camera_matrix"]
         dist = calib_result_pickle["dist"]
-        image = cv2.undistort(image, mtx, dist, None, 
-                                    optimal_camera_matrix)
+        #image = cv2.undistort(image, mtx, dist, None, 
+         #                           optimal_camera_matrix)
         #image = self.Zoom(image,2)
         img1 = image
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

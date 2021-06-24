@@ -115,7 +115,7 @@ def ocr():
            mdict1 = {value[1]:value[2]}
            dict.update(mdict1)
         HoldStatus("").writeFile(json.dumps(dict),"_validation")
-        return App.render(render_template("ocr.html", user=session['user']))
+        return App.render(render_template("ocr.html", user=111))
 
 @app.route("/calibration", methods=['POST','GET'])
 def calib():
