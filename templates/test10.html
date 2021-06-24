@@ -1,0 +1,45 @@
+No. of textfields :
+<input id="no_of_fields" type="text" />
+
+<div id="input_set">
+  <p>
+    <label for="my_input"></label>
+  </p>
+  <button id="btn" href="#">Add</button>
+</div>
+
+<script type="text/javascript">
+var wrapper_div = document.getElementById('input_set');
+var btn = document.getElementById('btn');
+
+btn.addEventListener('click', function() {
+  var n = document.getElementById("no_of_fields").value;
+  var fieldset = document.createElement('table'),
+    newInput;
+  for (var k = 1; k <= n; k++) {
+
+    newInput = document.createElement('label');
+
+    var idname = "lname" + k;
+
+    newInput = document.createElement('input');
+    newInput.type = 'text';
+    newInput.class = 'form-control';
+    newInput.id = idname;
+    newInput.placeholder = "Textfield no. " + k;
+    newInput.required = 'required';
+    fieldset.appendChild(newInput);
+
+    newInput = document.createElement('input');
+    newInput.value = '';
+    newInput.type = 'text';
+    newInput.placeholder = "Textfield no. " + k;
+    fieldset.appendChild(newInput);
+    fieldset.appendChild(document.createElement('br'));
+  }
+
+  wrapper_div.insertBefore(fieldset, this);
+
+}, false);
+
+</script>

@@ -106,7 +106,7 @@
         success: function (response) {
           var m = {};
           $.each(response["results"], function (key, value) {
-            $('#model').append($('<option></option>').val(value["1"]).html(value["1"])); 
+            $('#model').append($('<option></option>').val(value["1"]).html(value["1"]));
             // m['"'+value["1"]+'"'] = JSON.parse(value["2"]);
           });
           //localStorage.setItem("validation",JSON.stringify(m));

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<select onchange="test(this)" id="select_id">
+    <option value="0">-Select-</option>
+    <option value="1">Communication</option>
+    <option value="2">Communication</option>
+    <option value="3">Communication</option>
+</select>
+</body>
+</html>
+
+<script type="text/javascript">
+    function test(a) {
+    var x = (a.value || a.options[a.selectedIndex].value);  //crossbrowser solution =)
+    alert(x);
+}
+</script>

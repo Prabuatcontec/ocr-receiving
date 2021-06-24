@@ -1,0 +1,32 @@
+<script>
+var maxID = 0;
+function getTemplateRow() {
+var x = document.getElementById("templateRow").cloneNode(true);
+x.id = "";
+x.style.display = "";
+x.innerHTML = x.innerHTML.replace(/{id}/, ++maxID);
+return x;
+}
+function addRow() {
+var t = document.getElementById("theTable");
+var rows = t.getElementsByTagName("tr");
+var r = rows[rows.length - 1];
+r.parentNode.insertBefore(getTemplateRow(), r);
+
+}
+</script>
+
+
+<table id="theTable">
+<tr>
+<td>id</td>
+<td>name</td>
+</tr>
+<tr id="templateRow" style="display:none">
+<td>{id}</td>
+<td><input /></td>
+</tr>
+</table>
+
+
+<button onclick="addRow();">Go</button>

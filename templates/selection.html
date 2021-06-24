@@ -1,0 +1,127 @@
+{% extends "layout.html" %} {% block content %}
+<div id="centerDiv">
+  <div class="upload-form">
+    <span id="username" style="display: none">{{user}}</span>
+    <form id="form1" method="GET" name="selection" id="selection">
+      <div class="form-group">
+        <label for="option1">Please select your option:</label>
+        <div>
+          <div>
+              <select id="option1" name="option1" class="form-control">
+              <option value="">SELECT</option>
+              <option value="Customers">Customers</option>
+              <option value="Models">Models</option>
+              </select>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" id="selection2">
+        <label for="result">List:</label>
+        <div>
+          <select id="result" name="result" class="form-control">
+            <option value="">SELECT</option>
+          </select>
+        </div>
+        </div>
+      <div class="form-group">
+        <div id="button">
+          <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
+      </div>
+      
+    </form>
+  </div>
+</div>
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+    $("#button").hide();
+    $("#selection2").hide();
+ });
+
+$(document).ready(function(){
+  $("#option1").change(function(){
+
+    if(form1.option1.value == "Customers") {
+            $("#button").show();
+            $("#selection2").show();
+
+                  // Clearing old contents before add new options
+            $('#result').find('option').remove();
+            var x = document.getElementById("result");
+            var option = document.createElement("option");
+            option.text = "SELECT";
+            option.value = "";
+            x.add(option);
+
+            $("#overlay").fadeIn();
+            $.ajax({
+              type: "GET",
+              url: "api/customers",
+              data: {},
+              contentType: "application/json",
+              dataType: "json",
+              success: function (response) {
+                var m = {};
+                $.each(response["results"], function (key, value) {
+                  $('#result').append($('<option></option>').val(value["2"]).html(value["2"]));
+                });
+                console.log(m);
+                $("#overlay").fadeOut();
+                },
+            });
+        }
+
+    if(form1.option1.value == "Models") {
+            $("#button").show();
+            $("#selection2").show();
+
+                  // Clearing old contents before add new options
+            $('#result').find('option').remove();
+            var x = document.getElementById("result");
+            var option = document.createElement("option");
+            option.text = "SELECT";
+            option.value = "";
+            x.add(option);
+
+            $("#overlay").fadeIn();
+            $.ajax({
+              type: "GET",
+              url: "api/modellist",
+              data: {},
+              contentType: "application/json",
+              dataType: "json",
+              success: function (response) {
+                var m = {};
+                $.each(response["results"], function (key, value) {
+                  $('#result').append($('<option></option>').val(value["1"]).html(value["1"]));
+                });
+                console.log(m);
+                $("#overlay").fadeOut();
+                },
+            });
+
+        }
+
+  });
+});
+
+    var form2 = document.getElementById("form1")
+    form2.addEventListener('submit',function(event){
+
+        if(form2.result.value == "") {
+          alert("Please select the value from the list!");
+          return false;
+        }
+
+        event.preventDefault()
+        var opt1 = form2.option1.value;
+        var opt2 = form2.result.value;
+
+        alert( opt1 + opt2);
+
+    })
+
+</script>
+{% endblock %}

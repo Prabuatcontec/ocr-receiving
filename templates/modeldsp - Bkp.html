@@ -1,0 +1,355 @@
+{% extends "layout.html" %} {% block content %}
+<div class="content">
+    <div class="row">
+       <!-- <div class="col-md-4 col-sm-4 col-xs-12"></div>-->
+        <div class="col-md-3 col-sm-4 col-xs-12">
+            <span id="username" style="display: none">{{user}}</span>
+            <!--- form starts here --->
+            <form id="myform">
+                <div class="inputEle" style="">
+                    <label class="form-label" for="model">Model:</label>
+                    <input type="text" class="form-control" id="model" placeholder="Enter model" required
+                           autocomplete="off">
+                </div>
+                <div class="inputEle">
+                    <label class="form-label" for="mname">Model Name:</label>
+                    <input type="text" class="form-control" id="mname" placeholder="Enter model name" required
+                           autocomplete="off">
+                </div>
+                <div class="inputEle">
+                    <label class="form-label" for="nsets">No of Sets:</label>
+                    <input type="number" class="form-control" id="nsets" placeholder="Enter No of Sets" required
+                           autocomplete="off">
+                </div>
+                <div class="recvsubmit" style="float:left;margin-top:10px;">
+                    <button class="btn btn-primary" type="submit">Submit</button>
+                </div>
+            </form>
+            <!--- form ends here --->
+        </div>
+
+        <div class="col-md-6">
+            <table id="tableid" class="table table-bordered">
+                <thead>
+                <tr id="tabid" class="table-primary">
+                    <th colspan="4">Label Name</th>
+                    <th colspan="1">Minimum Size</th>
+                    <th colspan="1">Maximum Size</th>
+                    <th colspan="3">ReqularExp</th>
+                 </tr>
+                </thead>
+                <tbody id="mbody">
+                <tr id="1">
+                    <td colspan="4"><input type="text" class="form-control" id="row-1-lname" name="row-1-lname"
+                                           required></td>
+                    <td colspan="1"><input type="number" class="form-control" id="row-1-minsize"
+                                           name="row-1-minsize"
+                                           required></td>
+                    <td colspan="1"><input type="number" class="form-control" id="row-1-maxsize"
+                                           name="row-1-maximum"
+                                           required></td>
+                    <td colspan="3">
+                        <select class="form-select" size="1" id="row-1-reqexp" name="row-1-reqexp" required>
+                            <option selected disabled value="">Select</option>
+                            <option value="^[0-9A-Z]+$">^[0-9A-Z]+$</option>
+                        </select>
+                    </td>
+                </tr>
+
+                <tr id="2">
+                    <td colspan="4"><input type="text" class="form-control" id="row-2-lname" name="row-2-lname"
+                                           required></td>
+                    <td colspan="1"><input type="number" class="form-control" id="row-2-minsize"
+                                           name="row-2-minsize"
+                                           required></td>
+                    <td colspan="1"><input type="number" class="form-control" id="row-2-maxsize"
+                                           name="row-2-maximum"
+                                           required></td>
+                    <td colspan="3">
+                        <select class="form-select" size="1" id="row-2-reqexp" name="row-2-reqexp" required>
+                            <option selected disabled value="">Select</option>
+                            <option value="^[0-9A-Z]+$">^[0-9A-Z]+$</option>
+                        </select>
+                    </td>
+                </tr>
+
+                <tr id="3">
+                    <td colspan="4"><input type="text" class="form-control" id="row-3-lname" name="row-3-lname"
+                    ></td>
+                    <td colspan="1"><input type="number" class="form-control" id="row-3-minsize"
+                                           name="row-3-minsize"
+                    ></td>
+                    <td colspan="1"><input type="number" class="form-control" id="row-3-maxsize"
+                                           name="row-3-maximum"
+                    ></td>
+                    <td colspan="3">
+                        <select class="form-select" size="1" id="row-3-reqexp" name="row-3-reqexp">
+                            <option selected disabled value="">Select</option>
+                            <option value="^[0-9A-Z]+$">^[0-9A-Z]+$</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr id="4">
+                    <td colspan="4"><input type="text" class="form-control" id="row-4-lname" name="row-4-lname"
+                    ></td>
+                    <td colspan="1"><input type="number" class="form-control" id="row-4-minsize"
+                                           name="row-4-minsize"
+                    ></td>
+                    <td colspan="1"><input type="number" class="form-control" id="row-4-maxsize"
+                                           name="row-4-maximum"
+                    ></td>
+                    <td colspan="3">
+                        <select class="form-select" size="1" id="row-4-reqexp" name="row-4-reqexp">
+                            <option selected disabled value="">Select</option>
+                            <option value="^[0-9A-Z]+$">^[0-9A-Z]+$</option>
+                        </select>
+                    </td>
+                </tr>
+
+                <tr id="5">
+                    <td colspan="4"><input type="text" class="form-control" id="row-5-lname" name="row-5-lname"
+                    ></td>
+                    <td colspan="1"><input type="number" class="form-control" id="row-5-minsize"
+                                           name="row-5-minsize"
+                    ></td>
+                    <td colspan="1"><input type="number" class="form-control" id="row-5-maxsize"
+                                           name="row-5-maximum"
+                    ></td>
+                    <td colspan="3">
+                        <select class="form-select" size="1" id="row-5-reqexp" name="row-5-reqexp">
+                            <option selected disabled value="">Select</option>
+                            <option value="^[0-9A-Z]+$">^[0-9A-Z]+$</option>
+                        </select>
+                    </td>
+                </tr>
+
+                <tr id="6">
+                    <td colspan="4"><input type="text" class="form-control" id="row-6-lname" name="row-6-lname"
+                    ></td>
+                    <td colspan="1"><input type="number" class="form-control" id="row-6-minsize"
+                                           name="row-6-minsize"
+                    ></td>
+                    <td colspan="1"><input type="number" class="form-control" id="row-6-maxsize"
+                                           name="row-6-maximum"
+                    ></td>
+                    <td colspan="3">
+                        <select class="form-select" size="1" id="row-6-reqexp" name="row-6-reqexp">
+                            <option selected disabled value="">Select</option>
+                            <option value="^[0-9A-Z]+$">^[0-9A-Z]+$</option>
+                        </select>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style type=""text/css">
+
+.row { margin-top:50px;margin-bottom:50px;}
+.inputEle {
+	text-align: left !important;
+	width:50%
+}
+
+.recvsubmit {
+	float:left;
+	margin-top:14%;
+}
+
+input {
+text-align:left !important;
+}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function(){
+            $("#tabid").hide();
+            $("#1").hide();
+            $("#2").hide();
+            $("#3").hide();
+            $("#4").hide();
+            $("#5").hide();
+            $("#6").hide();
+ });
+ $(document).ready(function(){
+    $("#nsets").change(function(){
+                    $("#tabid").hide();
+                    $("#1").hide();
+                    $("#2").hide();
+                    $("#3").hide();
+                    $("#4").hide();
+                    $("#5").hide();
+                    $("#6").hide();
+        var number=document.getElementById("nsets").value;
+        if (number > 0){
+            var i;
+            for (i = 1; i<=number; i++){
+                switch(i){
+                    case i: $("#" + i).show();
+                    default: $("#tabid").show();
+                }
+            }
+        }
+        if ($("#1").is(":visible")){
+
+        }
+
+    });
+ });
+ </script>
+<script type="text/javascript">
+var form = document.getElementById("myform")
+form.addEventListener('submit',function(event){
+    event.preventDefault()
+    slash = '\\';
+    char1 = '": "{';
+    char2 = '"model';
+    char3 = '": ';
+    char4 = '"dcCount';
+    char5 = '": ';
+    char6 = '"data';
+    quote = '"';
+    qutsem = '":';
+
+
+
+    var model1 = document.getElementById("model").value;
+    var mname1 = document.getElementById("mname").value;
+    var num1 = document.getElementById("nsets").value;
+    var tab1 = document.getElementById("tableid")
+
+        res1 =  quote + model1 +
+                char1 + slash + char2 + slash + char3 + slash + quote + model1 + slash + quote + ',' + slash + char4
+                + slash + char5 + num1 + ',' + slash + char6 + slash + qutsem ;
+
+    qutat = '"';
+    semi = ':'
+    opnpra = '{';
+    clspra = '}';
+    comma = ',';
+    opbx = '[';
+    clbx = ']';
+    space = ' ';
+
+    if ($("#1").is(":visible")){
+             var name1 = document.getElementById("row-1-lname").value;
+             var minsize1 = document.getElementById("row-1-minsize").value;
+             var maxsize1 = document.getElementById("row-1-maxsize").value;
+             var reqexp1 = document.getElementById("row-1-reqexp").value;
+             var sort1 = 0;
+
+            data1 = opbx + opnpra
+                + slash + qutat + "label" + slash + qutat + semi+ space + slash + qutat + name1 + slash + qutat + comma
+                + slash + qutat + "min" + slash + qutat + semi+ space + minsize1 + comma
+                + slash + qutat + "max" + slash + qutat + semi+ space + maxsize1 + comma
+                + space + slash + qutat + "regularExp" + slash + qutat + semi+ space + slash + qutat + reqexp1 + slash
+                        + qutat + comma
+                + space + slash + qutat + "sort" + slash + qutat + semi+ space + slash + qutat + sort1 + slash
+                        + qutat + space + clspra;
+            data = data1;
+     }
+
+    if ($("#2").is(":visible")){
+         var name2 = document.getElementById("row-2-lname").value;
+         var minsize2 = document.getElementById("row-2-minsize").value;
+         var maxsize2 = document.getElementById("row-2-maxsize").value;
+         var reqexp2 = document.getElementById("row-2-reqexp").value;
+         var sort2 = 1;
+
+            data2 = comma + opnpra + space
+                + slash + qutat + "label" + slash + qutat + semi+ space + slash + qutat + name2 + slash
+                        + qutat + comma
+                + slash + qutat + "min" + slash + qutat + semi+ space + minsize2 + comma
+                + slash + qutat + "max" + slash + qutat + semi+ space + maxsize2 + comma
+                + space + slash + qutat + "regularExp" + slash + qutat + semi+ space + slash + qutat + reqexp2 + slash
+                        + qutat + comma
+                + space + slash + qutat + "sort" + slash + qutat + semi+ space + slash + qutat + sort2 + slash
+                        + qutat + clspra;
+
+            data = data1 + data2;
+
+    }
+    if ($("#3").is(":visible")){
+             var name3 = document.getElementById("row-3-lname").value;
+             var minsize3 = document.getElementById("row-3-minsize").value;
+             var maxsize3 = document.getElementById("row-3-maxsize").value;
+             var reqexp3 = document.getElementById("row-3-reqexp").value;
+             var sort3 = 2;
+
+            data3 = comma + opnpra + space
+                + slash + qutat + "label" + slash + qutat + semi+ space + slash + qutat + name3 + slash
+                        + qutat + comma
+                + slash + qutat + "min" + slash + qutat + semi+ space + minsize3 + comma
+                + slash + qutat + "max" + slash + qutat + semi+ space + maxsize3 + comma
+                + space + slash + qutat + "regularExp" + slash + qutat + semi+ space + slash + qutat + reqexp3 + slash
+                        + qutat + comma
+                + space + slash + qutat + "sort" + slash + qutat + semi+ space + slash + qutat + sort3 + slash
+                        + qutat + clspra;
+
+            data = data1 + data2 + data3;
+        }
+    if ($("#4").is(":visible")){
+         var name4 = document.getElementById("row-4-lname").value;
+         var minsize4 = document.getElementById("row-4-minsize").value;
+         var maxsize4 = document.getElementById("row-4-maxsize").value;
+         var reqexp4 = document.getElementById("row-4-reqexp").value;
+         var sort4 = 3;
+
+            data4 = comma + opnpra + space
+                + slash + qutat + "label" + slash + qutat + semi+ space + slash + qutat + name4 + slash
+                        + qutat + comma
+                + slash + qutat + "min" + slash + qutat + semi+ space + minsize4 + comma
+                + slash + qutat + "max" + slash + qutat + semi+ space + maxsize4 + comma
+                + space + slash + qutat + "regularExp" + slash + qutat + semi+ space + slash + qutat + reqexp4 + slash
+                        + qutat + comma
+                + space + slash + qutat + "sort" + slash + qutat + semi+ space + slash + qutat + sort4 + slash
+                        + qutat + clspra;
+
+            data = data1 + data2 + data3 + data4;
+    }
+    if ($("#5").is(":visible")){
+             var name5 = document.getElementById("row-5-lname").value;
+             var minsize5 = document.getElementById("row-5-minsize").value;
+             var maxsize5 = document.getElementById("row-5-maxsize").value;
+             var reqexp5 = document.getElementById("row-5-reqexp").value;
+             var sort5 = 4;
+
+            data5 = comma + opnpra + space
+                + slash + qutat + "label" + slash + qutat + semi+ space + slash + qutat + name5 + slash
+                        + qutat + comma
+                + slash + qutat + "min" + slash + qutat + semi+ space + minsize5 + comma
+                + slash + qutat + "max" + slash + qutat + semi+ space + maxsize5 + comma
+                + space + slash + qutat + "regularExp" + slash + qutat + semi+ space + slash + qutat + reqexp5 + slash
+                        + qutat + comma
+                + space + slash + qutat + "sort" + slash + qutat + semi+ space + slash + qutat + sort5 + slash
+                        + qutat + clspra;
+
+            data = data1 + data2 + data3 + data4 + data5;
+        }
+    if ($("#6").is(":visible")){
+         var name6 = document.getElementById("row-6-lname").value;
+         var minsize6 = document.getElementById("row-6-minsize").value;
+         var maxsize6 = document.getElementById("row-6-maxsize").value;
+         var reqexp6 = document.getElementById("row-6-reqexp").value;
+          var sort6 = 5;
+
+            data6 = comma + opnpra + space
+                + slash + qutat + "label" + slash + qutat + semi+ space + slash + qutat + name6 + slash
+                        + qutat + comma
+                + slash + qutat + "min" + slash + qutat + semi+ space + minsize6 + comma
+                + slash + qutat + "max" + slash + qutat + semi+ space + maxsize6 + comma
+                + space + slash + qutat + "regularExp" + slash + qutat + semi+ space + slash + qutat + reqexp6 + slash
+                        + qutat + comma
+                + space + slash + qutat + "sort" + slash + qutat + semi+ space + slash + qutat + sort6 + slash
+                        + qutat + clspra;
+
+            data = data1 + data2 + data3 + data4 + data5 + data6;
+    }
+
+    result = res1 + data + clbx + clspra + qutat;
+    alert(result);
+})
+</script>
+{% endblock %}

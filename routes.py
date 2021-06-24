@@ -44,3 +44,47 @@ def receiving():
     HoldStatus("0").writeFile("0", "_update")
     HoldStatus("").writeFile("","_validation")
     return render_template("receiving.html",customers=a['results'], user=session['user'])
+
+@routes_blueprint.route("/modeldsp", methods=['GET', "POST"])
+def modeldsp():
+  if request.method == 'POST':
+    response = requests.post(
+      Config.API_USER_URL + 'users/login', data=json.dumps({"username": request.form['username'], "password": request.form['password'], "Site": "Matamoros"}),
+      headers={'Content-Type': 'application/json'}
+    )
+    if response.status_code != 200:
+      return render_template("index.html", error="Authentication Failed!")
+    a = response.json()
+    session['user'] = a['user']['userName']
+    # session['user'] = 'a'
+    response = requests.get(
+        Config.API_URL + 'customers',
+        headers={'Content-Type': 'application/json'}
+    )
+    a = response.json()
+    HoldStatus("0").writeFile("0", "_update")
+    HoldStatus("").writeFile("","_validation")
+    return render_template("modeldsp.html", customers=a['results'], user=session['user'])
+
+  if request.method == 'GET':
+    response = requests.get(
+      Config.API_URL + 'customers',
+      headers={'Content-Type': 'application/json'}
+    )
+    a = response.json()
+    HoldStatus("0").writeFile("0", "_update")
+    HoldStatus("").writeFile("", "_validation")
+    return render_template("modeldsp.html", customers=a['results'], user=session['user'])
+
+
+@routes_blueprint.route("/cusmodupd", methods=['GET', "POST"])
+def selection():
+  if request.method == 'GET':
+    response = requests.get(
+      Config.API_URL + 'customers',
+      headers={'Content-Type': 'application/json'}
+    )
+    a = response.json()
+    HoldStatus("0").writeFile("0", "_update")
+    HoldStatus("").writeFile("", "_validation")
+    return render_template("cusmodupd.html", customers=a['results'], user=session['user'])

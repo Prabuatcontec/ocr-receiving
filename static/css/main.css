@@ -404,3 +404,15 @@ input:checked + .slider:before {
         transform: rotate(360deg);
     }
 }
+
+
+.inputEle {	
+	text-align: left !important;
+	width:50%
+}
+
+.recvsubmit {
+	float:left;
+	margin-top:10px;
+}
+
