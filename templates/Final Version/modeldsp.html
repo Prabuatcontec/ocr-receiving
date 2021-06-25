@@ -71,7 +71,7 @@ $(document).ready(function(){
         success: function (response) {
           var m = {};
           $.each(response["results"], function (key, value) {
-            $('#model').append($('<option></option>').val(value["1"]).html(value["2"]));
+            $('#model').append($('<option></option>').val(value["2"]).html(value["2"]));
           });
           console.log(m);
           $("#overlay").fadeOut();
@@ -194,9 +194,18 @@ $(document).ready(function(){
 </script>
 
 <script type="text/javascript">
+button.addEventListener('click', function() {
+    document.getElementById("button").disabled = true;
+    alert('world');
+});
+</script>
+
+<script type="text/javascript">
     var form = document.getElementById("myform")
     form.addEventListener('submit',function(event){
         event.preventDefault()
+
+        document.getElementById("button").disabled = true;
 
         slash = '\\';
         char1 = '": "{';
@@ -273,7 +282,7 @@ $(document).ready(function(){
                                     + qutat + sort1 + slash + qutat + comma
                             + space + slash + qutat + "palletcount" + slash + qutat + semi+ space + slash + qutat
                                     + pallet1 + slash + qutat + space + clspra;
-                var data2 =  data2 + data1;
+                var data2 =  data1;
                 }
                 if (rlen > 1) {
 

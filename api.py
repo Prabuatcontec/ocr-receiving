@@ -45,4 +45,6 @@ def insertcustmodel():
     responseBody = {"results": Connection().insertcustmodel1(req3, req4)}
     return jsonify(responseBody), 200
 
-
+@api_blueprint.route('/validatemodel/<model_id1>')
+def validatemodel(model_id1):
+    return jsonify(Connection().validateModel(model_id1)), 200

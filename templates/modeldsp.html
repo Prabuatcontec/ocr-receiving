@@ -7,19 +7,21 @@
             <!--- form starts here --->
             <form class="needs-validation" id="form1" method="POST" name="modeldsp">
                 <div class="form-group inputEle">
-                    <label for="model">Please select your model:</label>
+                    <label for="model">Enter your model:</label>
                         <div>
-                            <select id="model" name="model" class="form-control">
-                            <option value="">SELECT</option>
-                            </select>
+                            <input type="text" class="form-control" id="model" placeholder="Enter model" required
+                                    autocomplete="off">
                         </div>
                 </div>
                 <div class="inputEle">
-                    <label class="form-label" for="nsets">No of Sets:</label>
+                    <label id = "label2" class="form-label" for="nsets">No of Sets:</label>
                     <input type="number" class="form-control" id="nsets" placeholder="Enter No of Sets" required
                            min="0" max="6" autocomplete="off">
                 </div>
                 <textarea name="finaldata" id="finaldata" style="display: none;"></textarea>
+                <div id="wait"
+                     style="display:none;width:69px;height:89px;border:1px solid black;position:absolute;top:50%;left:50%;padding:2px;">
+                    <img src='images/demo_wait' width="64" height="64" /><br>Loading..</div>
             </form>
             <!--- form ends here --->
         </div>
@@ -59,34 +61,53 @@ text-align:left !important;
 <script type="text/javascript">
 
 $(document).ready(function(){
-            $("#button").hide();
+    $("#button").hide();
+    $(document).ajaxStart(function(){
+        $("#wait").css("display", "block");
+    });
+    $(document).ajaxComplete(function(){
+         $("#wait").css("display", "none");
+    });
+ });
 
-     $("#overlay").fadeIn();
-     $.ajax({
-        type: "GET",
-        url: "api/modellist",
-        data: {},
-        contentType: "application/json",
-        dataType: "json",
-        success: function (response) {
-          var m = {};
-          $.each(response["results"], function (key, value) {
-            $('#model').append($('<option></option>').val(value["2"]).html(value["2"]));
-          });
-          console.log(m);
-          $("#overlay").fadeOut();
-        },
-      });
+ $(document).ready(function(){
+    $("#model").change(function(){
 
+        inp_model = document.getElementById("model").value;
+        if(inp_model != "") {
+            var getData
+
+             $.ajax({
+                type: "GET",
+                url: "api/validatemodel/" + inp_model,
+                data: {},
+                contentType: "application/json",
+                dataType: "json",
+                success: function (response) {
+                    getData = response;
+
+                    if (getData == "Found") {
+                        alert("Existing Model,Please enter the new model again");
+                        document.getElementById("model").value = "";
+                        $('#model').focus();
+
+                    }
+                },
+              });
+        }
+    });
  });
 
  $(document).ready(function(){
     $("#nsets").change(function(){
 
-        if(form1.model.value == "") {
+        inp_model1 = document.getElementById("model").value;
+        if(inp_model1 == "") {
             alert("Please Enter Model!");
+            $('#model').focus();
             return false;
         }
+
 
         // ------   Remove table "modTable" ------
         if (document.getElementById("modTable")) {
@@ -102,6 +123,7 @@ $(document).ready(function(){
         }
 
         if (rowcount >=1) {
+
             $("#button").show();
             var arrHead = new Array();	// array for header.
             arrHead = ['Label Name', 'Minimum Size', 'Maximum Size', 'ReqularExp', 'Pallet Count'];
@@ -196,7 +218,6 @@ $(document).ready(function(){
 <script type="text/javascript">
 button.addEventListener('click', function() {
     document.getElementById("button").disabled = true;
-    alert('world');
 });
 </script>
 

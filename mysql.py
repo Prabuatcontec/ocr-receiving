@@ -45,6 +45,7 @@ class Connection:
 
         return models1
 
+
     def getModels(self, customer_id, model_id=""):
         self.cur.execute(
             "SELECT m.Name,m.Validation FROM Automation.CustomerModels  cm LEFT JOIN Automation.Models m ON cm.ModelId = m.Id Where cm.CustomerId =%d" % int(customer_id))
@@ -92,3 +93,17 @@ class Connection:
 
         return "Success"
 
+
+    def validateModel(self,model_id1):
+        sql2 = "SELECT * FROM Automation.Models where Name= %s"
+        val2 = (model_id1,)
+        self.cur.execute(sql2, val2)
+        row = self.cur.fetchone()
+
+        if row:
+            results = "Found"
+        else:
+            results = "Not Found"
+
+        print(results)
+        return results
