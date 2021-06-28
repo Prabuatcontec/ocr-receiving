@@ -129,10 +129,10 @@ class VideoCamera(object):
 
         
         success, image = self.video.read()
-        calib_result_pickle = pickle.load(open("static/uploads/camera_calib_pickle.p", "rb" ))
-        mtx = calib_result_pickle["mtx"]
-        optimal_camera_matrix = calib_result_pickle["optimal_camera_matrix"]
-        dist = calib_result_pickle["dist"]
+        # calib_result_pickle = pickle.load(open("static/uploads/camera_calib_pickle.p", "rb" ))
+        # mtx = calib_result_pickle["mtx"]
+        # optimal_camera_matrix = calib_result_pickle["optimal_camera_matrix"]
+        # dist = calib_result_pickle["dist"]
         #image = cv2.undistort(image, mtx, dist, None, 
         #                            optimal_camera_matrix)
         #image = self.Zoom(image,2)

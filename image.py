@@ -129,9 +129,9 @@ class ImageProcess(object):
                 continue
 
     def resetProcess(self):
-        #for file in os.scandir("static/processingImg"):
-        #    if file.name.endswith(".jpg"):
-        #        os.unlink(file.path)
+        for file in os.scandir("static/processingImg"):
+           if file.name.endswith(".jpg"):
+               os.unlink(file.path)
         HoldStatus("").writeFile("0", "_processing")
         HoldStatus("").writeFile("0", "_serialrowcount")
         HoldStatus("").writeFile("", "_serial")

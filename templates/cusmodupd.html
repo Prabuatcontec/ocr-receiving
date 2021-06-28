@@ -1,0 +1,136 @@
+{% extends "layout.html" %} {% block content %}
+<div id="centerDiv">
+  <div class="upload-form">
+    <span id="username" style="display: none">{{user}}</span>
+    <form method="POST" name="cusmodupd" id="cusmodupd">
+      <div class="form-group">
+        <label for="customer">Customer</label>
+        <div>
+          <select id="customer" name="customer" class="form-control">
+            <option value="">SELECT</option>
+           </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="model">Model</label>
+        <div>
+          <select id="model" name="model" class="form-control">
+            <option value="">SELECT</option>
+          </select>
+        </div>
+        </div>
+      <div class="form-group">
+        <div id="button">
+            <button class="btn btn-primary" type="submit">Save</button>
+        </div>
+      </div>
+      
+    </form>
+  </div>
+</div>
+
+<script type="text/javascript">
+
+  $(document).ready(function(){
+
+                 // Clearing old contents before add new options
+            $('#customer').find('option').remove();
+            var x = document.getElementById("customer");
+                // Default value
+            var option = document.createElement("option");
+            option.text = "SELECT";
+            option.value = "";
+            x.add(option);
+            $("#overlay").fadeIn();
+
+            $.ajax({
+              type: "GET",
+              url: "api/customers",
+              data: {},
+              contentType: "application/json",
+              dataType: "json",
+              success: function (response) {
+                var m = {};
+                $.each(response["results"], function (key, value) {
+                  $('#customer').append($('<option></option>').val(value["1"]).html(value["2"]));
+                });
+                console.log(m);
+                $("#overlay").fadeOut();
+                },
+            });
+
+                  // Clearing old contents before add new options
+            $('#model').find('option').remove();
+            var y = document.getElementById("model");
+            var option = document.createElement("option");
+            option.text = "SELECT";
+            option.value = "";
+            y.add(option);
+
+            $("#overlay").fadeIn();
+            $.ajax({
+              type: "GET",
+              url: "api/modellist",
+              data: {},
+              contentType: "application/json",
+              dataType: "json",
+              success: function (response) {
+                var m = {};
+                $.each(response["results"], function (key, value) {
+                  $('#model').append($('<option></option>').val(value["1"]).html(value["2"]));
+                });
+                console.log(m);
+                $("#overlay").fadeOut();
+                },
+            });
+});
+
+</script>
+
+<script type="text/javascript">
+              // Customer's ID value
+    $("#customer").change(function(){
+    m_cust1 = $(this).find(":selected").attr("value");
+    });
+              // Model's ID value
+    $("#model").change(function(){
+     m_model1 = $(this).find(":selected").attr("value");
+    });
+</script>
+
+<script type="text/javascript">
+    var form = document.getElementById("cusmodupd")
+
+    form.addEventListener('submit',function(event){
+        event.preventDefault()
+
+        var result2 = {
+           m_cust2: m_cust1,
+           m_model2: m_model1
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "api/insertcustmodel",
+            data: JSON.stringify(result2),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (response) {
+                swal({
+                    title: "Successfully Saved!",
+                    text: response.scriptstatus,
+                    icon: "success",
+                    button: "Ok",
+                    type: "success"
+                    }).then(function() {
+                    // Redirect the user
+                    window.location.reload();
+                    console.log('Successfully Saved');
+                    });
+            },
+        });
+
+    })
+</script>
+
+{% endblock %}

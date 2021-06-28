@@ -1,0 +1,363 @@
+{% extends "layout.html" %} {% block content %}
+<div class="content">
+    <div class="row">
+       <!-- <div class="col-md-4 col-sm-4 col-xs-12"></div>-->
+        <div class="col-md-3 col-sm-4 col-xs-12" align="center">
+            <span id="username" style="display: none">{{user}}</span>
+            <!--- form starts here --->
+            <form class="needs-validation" id="form1" method="POST" name="modeldsp">
+                <div class="form-group inputEle">
+                    <label for="model">Enter your model:</label>
+                        <div>
+                            <input type="text" class="form-control" id="model" placeholder="Enter model" required
+                                    autocomplete="off">
+                        </div>
+                </div>
+                <div class="inputEle">
+                    <label id = "label2" class="form-label" for="nsets">No of Sets:</label>
+                    <input type="number" class="form-control" id="nsets" placeholder="Enter No of Sets" required
+                           min="0" max="6" autocomplete="off">
+                </div>
+                <textarea name="finaldata" id="finaldata" style="display: none;"></textarea>
+                <div id="wait"
+                     style="display:none;width:69px;height:89px;border:1px solid black;position:absolute;top:50%;left:50%;padding:2px;">
+                    <img src='images/demo_wait' width="64" height="64" /><br>Loading..</div>
+            </form>
+            <!--- form ends here --->
+        </div>
+
+            <!--- form starts here --->
+        <div class="col-md-9 col-sm-4 col-xs-12" align="center">
+            <form id="myform">
+                <div class="recvsubmit" id="button">
+                    <button class="btn btn-primary" type="submit">Save</button>
+                </div>
+                 <div id="cont"></div>  <!-- the container to add the TABLE -->
+            </form>
+            <!--- form ends here --->
+        </div>
+
+    </div>
+</div>
+
+<style type=""text/css">
+
+.row { margin-top:50px;margin-bottom:50px;}
+.inputEle {
+	text-align: left !important;
+	width:60%
+}
+
+.recvsubmit {
+	float:left;
+	margin-top:12%;
+}
+
+input {
+text-align:left !important;
+}
+</style>
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+    $("#button").hide();
+    $(document).ajaxStart(function(){
+        $("#wait").css("display", "block");
+    });
+    $(document).ajaxComplete(function(){
+         $("#wait").css("display", "none");
+    });
+ });
+
+ $(document).ready(function(){
+    $("#model").change(function(){
+
+        inp_model = document.getElementById("model").value;
+        if(inp_model != "") {
+            var getData
+
+             $.ajax({
+                type: "GET",
+                url: "api/validatemodel/" + inp_model,
+                data: {},
+                contentType: "application/json",
+                dataType: "json",
+                success: function (response) {
+                    getData = response;
+
+                    if (getData == "Found") {
+                        alert("Existing Model,Please enter the new model again");
+                        document.getElementById("model").value = "";
+                        $('#model').focus();
+
+                    }
+                },
+              });
+        }
+    });
+ });
+
+ $(document).ready(function(){
+    $("#nsets").change(function(){
+
+        inp_model1 = document.getElementById("model").value;
+        if(inp_model1 == "") {
+            alert("Please Enter Model!");
+            $('#model').focus();
+            return false;
+        }
+
+
+        // ------   Remove table "modTable" ------
+        if (document.getElementById("modTable")) {
+            var empTab1 = document.getElementById('modTable');
+            empTab1.remove();
+            }
+
+        var rowcount = document.getElementById("nsets").value;
+        if (rowcount <=0) {
+            $("#button").hide();
+        } else {
+            $("#button").show();
+        }
+
+        if (rowcount >=1) {
+
+            $("#button").show();
+            var arrHead = new Array();	// array for header.
+            arrHead = ['Label Name', 'Minimum Size', 'Maximum Size', 'ReqularExp', 'Pallet Count'];
+
+         // ------   Create table "modTable" ------
+                var modTable = document.createElement('table');
+            modTable.setAttribute('id', 'modTable'); // table id.
+            modTable.setAttribute('class', 'table');
+            modTable.setAttribute("style","border:3px;");
+
+                var tr = modTable.insertRow(-1);
+                    for (var h = 0; h < arrHead.length; h++) {
+                        var th = document.createElement('th'); // create table headers
+                        th.innerHTML = arrHead[h];
+                        tr.appendChild(th);
+                    }
+                var div = document.getElementById('cont');
+                div.appendChild(modTable);  // add the TABLE to the container.
+
+            var empTab = document.getElementById('modTable');
+
+            for (var d = 1; d <= rowcount; d++) {
+
+                tr = empTab.insertRow(d);
+                var rowid = 'row' + d;             // Setting Row ID
+                tr.setAttribute('id', rowid);
+
+                    for (var c = 0; c < arrHead.length; c++) {
+                        var td = document.createElement('td'); // table definition.
+                        td = tr.insertCell(c);
+
+                            if (c == 3) {      // the first column.
+                            // add a button in every new row in the first column.
+                            var SELECT = document.createElement('SELECT');
+
+                                var colid1 = 'col' + d;
+                                SELECT.setAttribute('class','form-control');
+                                SELECT.setAttribute('required', 'true');
+                                SELECT.setAttribute('id', colid1);
+                                SELECT.setAttribute('size','1');
+                                SELECT.setAttribute('type', 'text');
+
+                            var OPT1 = document.createElement('OPTION');
+                                OPT1.value = "";
+                                OPT1.text = "Select";
+                                SELECT.add(OPT1);
+                            var OPT2 = document.createElement('OPTION');
+                                OPT2.value = OPT2.text = "^[0-9A-Z]+$";
+                                SELECT.add(OPT2);
+                            var OPT3 = document.createElement('OPTION');
+                                OPT3.value = OPT3.text = "^S[A-Z]+$";
+                                SELECT.add(OPT3);
+                            var OPT4 = document.createElement('OPTION');
+                                OPT4.value = OPT4.text = "^0H[0-9A-Z]+$";
+                                SELECT.add(OPT4);
+                            var OPT5 = document.createElement('OPTION');
+                                OPT5.value = OPT5.text = "^[0-9-0-9]+$";
+                                SELECT.add(OPT5);
+
+                            td.appendChild(SELECT);
+
+                            } else {
+
+                                // 2nd, 3rd and 4th column, will have textbox.
+                                var ele = document.createElement('input');
+                                ele.setAttribute('type', 'text');
+                                if (c == 0) {
+                                    ele.setAttribute('type', 'text');
+                                }
+                                if (c == 1 || c == 2 || c == 4) {
+                                    ele.setAttribute('type', 'number');
+                                }
+                                var colid = 'col' + d;             // Setting Column ID
+                                ele.setAttribute('id', colid);
+                                ele.setAttribute('required', 'true');
+                                ele.setAttribute('autocomplete', 'off');
+                                ele.setAttribute('class','form-control');
+                                ele.setAttribute('min','1');
+
+                                td.appendChild(ele);
+                            }
+
+                    }
+
+            }
+        }
+
+    });
+ });
+</script>
+
+<script type="text/javascript">
+button.addEventListener('click', function() {
+    document.getElementById("button").disabled = true;
+});
+</script>
+
+<script type="text/javascript">
+    var form = document.getElementById("myform")
+    form.addEventListener('submit',function(event){
+        event.preventDefault()
+
+        document.getElementById("button").disabled = true;
+
+        slash = '\\';
+        char1 = '": "{';
+        char2 = '"model';
+        char3 = '": ';
+        char4 = '"dcCount';
+        char5 = '": ';
+        char6 = '"data';
+        quote = '"';
+        qutsem = '":';
+
+
+        var model1 = document.getElementById("model").value;
+        var num1 = document.getElementById("nsets").value;
+        var tab1 = document.getElementById("modTable")
+
+        res1 =  quote + model1 +
+                char1 + slash + char2 + slash + char3 + slash + quote + model1 + slash + quote + ',' + slash + char4
+                + slash + char5 + num1 + ',' + slash + char6 + slash + qutsem ;
+
+        qutat = '"';
+        semi = ':'
+        opnpra = '{';
+        clspra = '}';
+        comma = ',';
+        opbx = '[';
+        clbx = ']';
+        space = ' ';
+
+        var data = "";   // Initialising variable "data"
+
+            for (var rlen = 1; rlen <= num1; rlen++) {
+
+                for (var clen = 0; clen < 5; clen++) {
+                    var element = tab1.rows.item(rlen).cells[clen];
+
+                    if (element.childNodes[0].getAttribute('type') == 'text') {
+                        if (clen == 0){
+                            var name1 = element.childNodes[0].value;
+                        }
+                    }
+                    if (element.childNodes[0].getAttribute('type') == 'text') {
+                        if (clen == 3){
+                            var colnum = "col1" + clen
+                            var reqexp1 =  element.childNodes[0].value;
+                        }
+                    }
+                    if (element.childNodes[0].getAttribute('type') == 'number') {
+                        if (clen == 1){
+                            var minsize1 = element.childNodes[0].value;
+                        }
+                        if (clen == 2){
+                            var maxsize1 = element.childNodes[0].value;
+                        }
+                        if (clen == 4){
+                            var pallet1 = element.childNodes[0].value;
+                        }
+
+                    }
+
+                    var sort1 = rlen - 1;
+                }
+
+                if (rlen == 1) {
+
+                    data1 = opbx + opnpra
+                            + slash + qutat + "label" + slash + qutat + semi+ space + slash + qutat + name1
+                                    + slash + qutat + comma
+                            + slash + qutat + "min" + slash + qutat + semi+ space + minsize1 + comma
+                            + slash + qutat + "max" + slash + qutat + semi+ space + maxsize1 + comma
+                            + space + slash + qutat + "regularExp" + slash + qutat + semi+ space + slash
+                                    + qutat + reqexp1 + slash + qutat + comma
+                            + space + slash + qutat + "sort" + slash + qutat + semi+ space + slash
+                                    + qutat + sort1 + slash + qutat + comma
+                            + space + slash + qutat + "palletcount" + slash + qutat + semi+ space + slash + qutat
+                                    + pallet1 + slash + qutat + space + clspra;
+                var data2 =  data1;
+                }
+                if (rlen > 1) {
+
+                   data1 = comma + opnpra + space
+                            + slash + qutat + "label" + slash + qutat + semi+ space + slash + qutat + name1 + slash
+                                    + qutat + comma + space
+                            + slash + qutat + "min" + slash + qutat + semi+ space + minsize1 + comma
+                            + slash + qutat + "max" + slash + qutat + semi+ space + maxsize1 + comma
+                            + space + slash + qutat + "regularExp" + slash + qutat + semi+ space + slash + qutat
+                                    + reqexp1 + slash + qutat + comma
+                            + space + slash + qutat + "sort" + slash + qutat + semi+ space + slash + qutat
+                                    + sort1 + slash + qutat + clspra;
+                   data2 =  data2 + data1;
+                }
+
+                data1 = "";   // // Initialising variable "data1"
+
+            }
+
+        result = res1 + data2 + clbx + clspra + qutat;
+
+        result1 = data2 + clbx + clspra + qutat;
+
+        document.getElementById("finaldata").value = result;
+
+        var mydata = document.getElementById("finaldata").value;
+
+        var result2 = {
+           m_name: model1,
+           m_data: mydata
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "api/insertmodeldata",
+            data: JSON.stringify(result2),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (response) {
+                swal({
+                    title: "Successfully Saved!",
+                    text: response.scriptstatus,
+                    icon: "success",
+                    button: "Ok",
+                    type: "success"
+                    }).then(function() {
+                    // Redirect the user
+                    window.location.reload();
+                    console.log('Successfully Saved');
+                    });
+            },
+        });
+
+    });
+</script>
+
+{% endblock %}

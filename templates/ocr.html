@@ -1,5 +1,5 @@
 {% extends "layout.html" %} {% block content %}
-
+<div id="centerDivVideo">
 <p id="count" style="display: none">0</p>
 <button id="checkStatus" onclick="server.increment()" style="display: none">
   0
@@ -19,7 +19,7 @@
       class="center"
       src="{{ url_for('video_feed', user=user) }}"
     />
-  </div>
+    <div style="clear: both;"></div>
   <div class="ocr_value">
     <ul>
       <li>
@@ -36,6 +36,7 @@
     </ul>
     <audio id="mySong" src=""></audio>
   </div>
+
 </div>
 <script type="text/javascript">
   $(document).ready(function () {
@@ -70,4 +71,6 @@
   
   
   </script>
+  </div>
+  </div>
 {% endblock %}

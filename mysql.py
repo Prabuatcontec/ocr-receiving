@@ -14,6 +14,40 @@ class Connection:
         self.db.autocommit(True)
         self.db.set_character_set('utf8mb4')
         self.cur = self.db.cursor()
+    
+    def getModelList(self):
+        self.cur.execute("SELECT id, Name FROM Automation.Models ORDER BY Name ")
+
+        rows = [x for x in self.cur]
+        cols = [x[0] for x in self.cur.fetchall()]
+        models1 = []
+
+        for row in rows:
+            model1 = {}
+            v = 0
+            for prop, val in zip(cols, row):
+                v = v + 1
+                model1[v] = val
+                models1.append(model1)
+
+        return models1
+
+    def insertmodeldata1(self, inpname, inpdata):
+
+        sql1 = "INSERT INTO Automation.Models (Name, Validation) VALUES (%s, %s)"
+        val1 = (inpname, inpdata)
+        self.cur.execute(sql1, val1)
+
+        return 1
+
+    def insertcustmodel1(self, inpcust, inpmodel):
+
+        sql1 = "INSERT INTO Automation.CustomerModels (CustomerId, ModelId) VALUES (%s, %s)"
+        val1 = (inpcust, inpmodel)
+        self.cur.execute(sql1, val1)
+
+        return "Success"
+
 
     def getCustomer(self):
         self.cur.execute("select Id, Name from Customers")
@@ -58,3 +92,17 @@ class Connection:
         self.cur.execute(sql, val)
  
         return 1
+
+    def validateModel(self,model_id1):
+        sql2 = "SELECT * FROM Automation.Models where Name= %s"
+        val2 = (model_id1,)
+        self.cur.execute(sql2, val2)
+        row = self.cur.fetchone()
+
+        if row:
+            results = "Found"
+        else:
+            results = "Not Found"
+
+        print(results)
+        return results 
