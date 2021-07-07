@@ -123,6 +123,92 @@ class VideoCamera(object):
              
         return [jpeg.tobytes(), 0]
 
+     ## picture rotation
+    def rotate_bound(self, image, angle):
+        return imutils.rotate(image, -angle) 
+ 
+    def getImageRotate(self, image):
+        
+        imageHeight, imageWidth= image.shape[0:2]
+        print(imageWidth, ", ", imageHeight)
+        swapImage = image.copy()
+        templateImageWidth = 0
+        templateImageHeight = 0
+        toWidth = 500
+        
+        if imageWidth > toWidth and imageWidth > imageHeight:
+            templateImageWidth = toWidth
+            templateImageHeight = toWidth / imageWidth * imageHeight
+        elif imageHeight > toWidth and imageHeight > imageWidth:
+            templateImageHeight = toWidth
+            templateImageWidth = toWidth / imageHeight * imageWidth
+            # Use Numpy create a black paper
+        lastImageWidth = templateImageWidth
+        if templateImageWidth < templateImageHeight:
+            lastImageWidth = templateImageHeight
+        else:
+            lastImageWidth = templateImageWidth
+        lastImageWidth = int(math.sqrt(lastImageWidth * lastImageWidth * 2))
+        templateImage = np.zeros((lastImageWidth, lastImageWidth, 3), np.uint8)
+            # Use black fill the picture area
+        
+        templateImage.fill(0)
+        # cv2.imshow("templateImage", templateImage)
+        print(templateImageWidth, ", ", templateImageHeight)
+        swapImage = cv2.resize(swapImage, (int(templateImageWidth), int(templateImageHeight)))
+        # cv2.imshow("swapImage", swapImage)
+        grayImage = cv2.cvtColor(swapImage, cv2.COLOR_BGR2GRAY)
+        
+        # cv2.imshow("grayImage", grayImage)
+        # gaussianBlurImage = cv2.GaussianBlur(grayImage, (3, 3), 3)
+        binaryImage = cv2.adaptiveThreshold(grayImage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 35)
+            # Ret, thresh1 = cv2.threshold (binaryImage, 127, 255, cv2.THRESH_BINARY) # is greater than the threshold value is white
+        
+        swapBinnaryImage = ~binaryImage
+        
+        # cv2.imshow("swapBinnaryImage", binaryImage)
+        width, height = templateImage.shape[0:2]
+        center = (height // 2, width // 2)
+        print(width, height)
+        
+        mask = 255 * np.ones(swapBinnaryImage.shape, swapBinnaryImage.dtype)
+        
+        checkBaseImage = cv2.seamlessClone(swapBinnaryImage, templateImage, mask, center, cv2.NORMAL_CLONE)
+        #cv2.imshow("checkBaseImage", checkBaseImage)
+        minRotate = 0
+        minCount = -100
+        maxPixSum = -100
+        
+        for rotate in range(-35, 35):
+            rotateImage = self.rotate_bound(checkBaseImage, rotate)
+            rotateImageWidth = len(rotateImage)
+            xPixList = []
+            pixSum = 0
+            for i in range(rotateImageWidth):
+                lineCount = 0
+                pixSum += cv2.sumElems(rotateImage[i])[0]
+                lineCount += cv2.countNonZero(rotateImage[i])
+                if lineCount > 0:
+                    xPixList.append(lineCount)
+            # if pixSum == -100:
+            #     maxPixSum = pixSum
+            #     minRotate = rotate
+            # if pixSum > maxPixSum:
+            #     maxPixSum = pixSum
+            #     minRotate = rotate
+            if minCount == -100:
+                minCount = len(xPixList)
+                minRotate = rotate
+            # print(len(xPixList), ", ", minCount)
+            if len(xPixList) < minCount:
+                    minCount = len(xPixList)
+                    minRotate = rotate
+            # print(minRotate)
+        print("over: rotate = ", minRotate)
+        print("maxPixSum = ", maxPixSum)
+        return minRotate
+
+    
 
     def get_Singleframe(self, user):
         cv2_version_major = int(cv2.__version__.split('.')[0])
@@ -137,67 +223,44 @@ class VideoCamera(object):
         #                            optimal_camera_matrix)
         #image = self.Zoom(image,2)
         img1 = image
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        ret, jpeg = cv2.imencode('.jpg', img1)
+        hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+        yellow_lower = np.array([20, 100, 100])
+        yellow_upper = np.array([30, 255, 255])
+        mask_yellow = cv2.inRange(hsv, yellow_lower, yellow_upper)
 
-        
 
-        # compute the Scharr gradient magnitude representation of the images
-        # in both the x and y direction using OpenCV 2.4
-        ddepth = cv2.cv.CV_32F if imutils.is_cv2() else cv2.CV_32F
-        gradX = cv2.Sobel(gray, ddepth=ddepth, dx=1, dy=0, ksize=-1)
-        gradY = cv2.Sobel(gray, ddepth=ddepth, dx=0, dy=1, ksize=-1)
+        _,contours,h= cv2.findContours(mask_yellow,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+        if(len(contours)<10):
+            return [jpeg.tobytes(), 0] 
 
-        # subtract the y-gradient from the x-gradient
-        gradient = cv2.subtract(gradX, gradY)
-        gradient = cv2.convertScaleAbs(gradient)
-
-        # blur and threshold the image
-        blurred = cv2.blur(gradient, (9, 9))
-        (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)   
-
-        coords = np.column_stack(np.where(thresh > 0))
-        angle = cv2.minAreaRect(coords)[-1]
-        if angle < -45:
-            angle = -(90 + angle)
-        # otherwise, just take the inverse of the angle to make
-        # it positive
-        else:
-            angle = -angle
-
-        (h, w) = image.shape[:2]
-        center = (w // 2, h // 2)
-        M = cv2.getRotationMatrix2D(center, angle, 1.0)
-        
-
-        rotated = cv2.warpAffine(image, M, (w, h),
-            flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-        cv2.putText(rotated, "Angle: {:.2f} degrees".format(angle),
-	        (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        
-        
-
-        
-        ret, jpeg = cv2.imencode('.jpg', gray)
-       
         gmt = time.gmtime()
         ts = calendar.timegm(gmt)
-        barcodes = pyzbar.decode(rotated)
+        
         fillenameImage = str(str(ts)+'-'+str(random.randint(100000,999999)))
-        #cv2.imwrite("static/processingImg/YYYboxER_%s.jpg" % fillenameImage, rotated)
-        if len(barcodes) > 0:
+        #image = cv2.imread("static/uploads/image.jpg")
+        
+        rotateAngle = self.getImageRotate(image)
+        print("lastAngle = ", rotateAngle)
+        image = self.rotate_bound(image, rotateAngle)
+        #cv2.imwrite("static/processingImg/PPPRboxER_%s000.jpg" % fillenameImage, image)
+        barcodes = pyzbar.decode(image)
 
-            
+        if(len(barcodes) == 0):
+            image = self.rotate_bound(image, 90)
+
+
+        if len(barcodes) > 0 :
             serials = []
-                    
+   
+
             for barcode in barcodes:
                 barcodeData = barcode.data.decode("utf-8")
                 if(self.detect_special_characer(barcodeData) == True):
                     serials.append(barcodeData)
-            
+
             lastScan = HoldStatus("").readFile("_lastScan")
             lastSerialCount = HoldStatus("").readFile("_lastScanCount")
-            # print("last Scan = "+ str(fillenameImage) +"======"+ str(lastScan) +"======"+ str(json.dumps([ele for ele in reversed(serials)])))
-            # print("last Scancount = "+ str(lastSerialCount) +"======"+ str(len(serials)))
             if(str(lastScan) == str(json.dumps([ele for ele in reversed(serials)]))):
                 return [jpeg.tobytes(), 0]
             if(int(lastSerialCount) > int(len(serials))):
@@ -207,11 +270,11 @@ class VideoCamera(object):
             HoldStatus("").writeFile(str(len(serials)), "_lastScanCount")
 
             serials.append(fillenameImage)
-            cv2.imwrite("static/processingImg/boxER_%s.jpg" % fillenameImage, rotated)
+            cv2.imwrite("static/processingImg/boxER_%s.jpg" % fillenameImage, image)
             file1 = open("static/uploads/_serial.txt", "a")
             file1.write(json.dumps([ele for ele in reversed(serials)]))
             file1.write("\n")
-        return [jpeg.tobytes(), 0]
+        return [jpeg.tobytes(), 0] 
 
 
 
@@ -258,5 +321,3 @@ class VideoCamera(object):
         return [jpeg.tobytes(), 0]
 
 
-
-        
