@@ -225,13 +225,13 @@ class VideoCamera(object):
         img1 = image
         ret, jpeg = cv2.imencode('.jpg', img1)
         hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
-        yellow_lower = np.array([20, 100, 100])
-        yellow_upper = np.array([30, 255, 255])
+        yellow_lower = np.array([0, 0, 0])
+        yellow_upper = np.array([0, 0, 255])
         mask_yellow = cv2.inRange(hsv, yellow_lower, yellow_upper)
 
 
         _,contours,h= cv2.findContours(mask_yellow,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-        if(len(contours)<10):
+        if(len(contours)<1000):
             return [jpeg.tobytes(), 0] 
 
         gmt = time.gmtime()
