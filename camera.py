@@ -134,7 +134,7 @@ class VideoCamera(object):
         swapImage = image.copy()
         templateImageWidth = 0
         templateImageHeight = 0
-        toWidth = 500
+        toWidth = 900
         
         if imageWidth > toWidth and imageWidth > imageHeight:
             templateImageWidth = toWidth
@@ -215,6 +215,7 @@ class VideoCamera(object):
 
         
         success, image = self.video.read()
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         # calib_result_pickle = pickle.load(open("static/uploads/camera_calib_pickle.p", "rb" ))
         # mtx = calib_result_pickle["mtx"]
         # optimal_camera_matrix = calib_result_pickle["optimal_camera_matrix"]
@@ -231,7 +232,7 @@ class VideoCamera(object):
 
 
         _,contours,h= cv2.findContours(mask_yellow,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-        if(len(contours)<1000):
+        if(len(contours)<100):
             return [jpeg.tobytes(), 0] 
 
         gmt = time.gmtime()
@@ -240,14 +241,45 @@ class VideoCamera(object):
         fillenameImage = str(str(ts)+'-'+str(random.randint(100000,999999)))
         #image = cv2.imread("static/uploads/image.jpg")
         
-        rotateAngle = self.getImageRotate(image)
-        print("lastAngle = ", rotateAngle)
-        image = self.rotate_bound(image, rotateAngle)
+        #rotateAngle = self.getImageRotate(image)
+        #print("lastAngle = ", rotateAngle)
+        #image = self.rotate_bound(image, rotateAngle)
         #cv2.imwrite("static/processingImg/PPPRboxER_%s000.jpg" % fillenameImage, image)
+
+        # compute the Scharr gradient magnitude representation of the images
+        # in both the x and y direction using OpenCV 2.4
+        ddepth = cv2.cv.CV_32F if imutils.is_cv2() else cv2.CV_32F
+        gradX = cv2.Sobel(gray, ddepth=ddepth, dx=1, dy=0, ksize=-1)
+        gradY = cv2.Sobel(gray, ddepth=ddepth, dx=0, dy=1, ksize=-1)
+
+        # subtract the y-gradient from the x-gradient
+        gradient = cv2.subtract(gradX, gradY)
+        gradient = cv2.convertScaleAbs(gradient)
+
+        # blur and threshold the image
+        blurred = cv2.blur(gradient, (9, 9))
+        (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)   
+
+        coords = np.column_stack(np.where(thresh > 0))
+        angle = cv2.minAreaRect(coords)[-1]
+        if angle < -45:
+            angle = -(90 + angle)
+        # otherwise, just take the inverse of the angle to make
+        # it positive
+        else:
+            angle = -angle
+
+        image = self.rotate_bound(image, angle)
+            
         barcodes = pyzbar.decode(image)
 
         if(len(barcodes) == 0):
-            image = self.rotate_bound(image, 90)
+            lo = [15,30,45,60,75,90]
+            for x in lo:
+                image = self.rotate_bound(image, x)
+                barcodes = pyzbar.decode(image)
+                if len(barcodes) > 0 :
+                    break
 
 
         if len(barcodes) > 0 :
@@ -258,6 +290,10 @@ class VideoCamera(object):
                 barcodeData = barcode.data.decode("utf-8")
                 if(self.detect_special_characer(barcodeData) == True):
                     serials.append(barcodeData)
+
+            print("Serialsssssssssssssssssssssssssss")
+            print(serials)
+            print("Serialsssssssssssssssssssssssssss")
 
             lastScan = HoldStatus("").readFile("_lastScan")
             lastSerialCount = HoldStatus("").readFile("_lastScanCount")
