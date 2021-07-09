@@ -273,13 +273,13 @@ class VideoCamera(object):
             
         barcodes = pyzbar.decode(image)
 
-        if(len(barcodes) == 0):
-            lo = [15,30,45,60,75,90]
-            for x in lo:
-                image = self.rotate_bound(image, x)
-                barcodes = pyzbar.decode(image)
-                if len(barcodes) > 0 :
-                    break
+        # if(len(barcodes) == 0):
+        #     lo = [15,30,45,60,75,90]
+        #     for x in lo:
+        #         image = self.rotate_bound(image, x)
+        #         barcodes = pyzbar.decode(image)
+        #         if len(barcodes) > 0 :
+        #             break
 
 
         if len(barcodes) > 0 :
